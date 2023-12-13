@@ -38,23 +38,15 @@ struct HapticEngineFeature: Reducer {
     }
     
     let client: HapticEngineClient
-        
+    let encoder = JSONEncoder.init()
+
     var body: some ReducerOf<Self> {
         Reduce { state, action in
             switch action {
             case .onAppear:
-                
-//                let data   if let prettyPrintedData = try? JSONSerialization.data(withJSONObject: json, options: .prettyPrinted) {
-//try? JSONSerialization.data(withJSONObject: state.hapticPattern, options: .prettyPrinted)
-//                try NSJSONSerialization.dataWithJSONObject(props,
-//                            options: .PrettyPrinted)
-                
-                let encoder = JSONEncoder()
                 encoder.outputFormatting = .prettyPrinted
                 state.formattedString = (try? encoder.encode(state.hapticPattern))
-                    .flatMap {
-                    String(data: $0, encoding: .utf8)
-                }
+                    .flatMap { String(data: $0, encoding: .utf8) }
 
                 return .run { send in
                     do {
