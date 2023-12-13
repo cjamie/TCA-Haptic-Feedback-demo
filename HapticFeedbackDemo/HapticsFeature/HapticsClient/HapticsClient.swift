@@ -9,14 +9,11 @@
 struct HapticsClient {
     let supportsHaptics: () -> Bool
     let generators: [HapticType: MyFeedbackGenerator]
-
+    
     static let mock = HapticsClient(
         supportsHaptics: { false },
         generators: HapticType.allCases.reduce(into: [:]) { acc, next in
-            acc[next] = .init(
-                prepare: {},
-                run: { _ in  }
-            )
+            acc[next] = .mock
         }
     )
 }

@@ -6,7 +6,6 @@
 //
 
 import SwiftUI
-//import CoreHaptics
 import ComposableArchitecture
 
 struct HapticEngineFeature: Reducer {

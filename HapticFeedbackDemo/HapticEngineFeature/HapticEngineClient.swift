@@ -8,41 +8,31 @@
 import Foundation
 import CoreHaptics
 
-
-
-
 struct HapticEngineClient {
-    
     let supportsHaptics: () -> Bool
-    let makeHapticEngine: () async throws -> HapticEngine
-//    let makePlayer: (HapticPattern) ->
+    let makeHapticEngine: () throws -> HapticEngine
     
-    static let live: HapticEngineClient = {
-        let temp = HapticEngineClient(
-            supportsHaptics: {
-                CHHapticEngine.capabilitiesForHardware().supportsHaptics
-            },
-            makeHapticEngine: {
-                let realEngine = try CHHapticEngine()
-
-                return HapticEngine(
-                    objId: ObjectIdentifier(realEngine),
-                    start: realEngine.start,
-                    makePlayer: { pattern in
-                        let temp = try realEngine.makePlayer(with: pattern.toCHHapticPattern)
-                        
-                        return .init(start: { time in
-                            try temp.start(atTime: time)
-                        })
-                    }
-                )
-            }
-        )
+    static let live = HapticEngineClient(
+        supportsHaptics: {
+            CHHapticEngine.capabilitiesForHardware().supportsHaptics
+        },
+        makeHapticEngine: {
+            let realEngine = try CHHapticEngine()
+            
+            return HapticEngine(
+                objId: ObjectIdentifier(realEngine),
+                start: realEngine.start,
+                makePlayer: { pattern in
+                    let player = try realEngine.makePlayer(with: pattern.toCHHapticPattern)
+                    
+                    return .init(start: { time in
+                        try player.start(atTime: time)
+                    })
+                }
+            )
+        }
+    )
         
-        return temp
-    }()
-    
-    
     static let mock: HapticEngineClient = {
 
         let temp = HapticEngineClient(
@@ -79,7 +69,6 @@ extension CHHapticEvent {
 }
 
 struct HapticEngine: Equatable {
-    
     let objId: ObjectIdentifier
     let start: () async throws -> Void
     
@@ -186,6 +175,4 @@ struct HapticPatternPlayer {
     let start: (TimeInterval) throws -> Void
 }
 
-//CHHapticPatternPlayer
-//import CoreHaptics
 let HapticTimeImmediate = CoreHaptics.CHHapticTimeImmediate

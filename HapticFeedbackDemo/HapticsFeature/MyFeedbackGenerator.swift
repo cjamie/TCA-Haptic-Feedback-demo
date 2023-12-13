@@ -18,4 +18,9 @@ struct MyFeedbackGenerator {
         self.prepare = prepare
         self.run = run
     }
+    
+    static let mock = MyFeedbackGenerator(
+        prepare: {},
+        run: { _ in  }
+    )
 }
