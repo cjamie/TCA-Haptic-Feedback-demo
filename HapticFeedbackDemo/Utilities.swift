@@ -22,3 +22,20 @@ func zipOptional<T, U>(_ first: T?, _ second: U?) -> (T, U)? {
     }
     return (firstValue, secondValue)
 }
+
+extension Optional {
+    enum UnwrapError: Error {
+        case nilValue
+    }
+
+    func unwrapOrThrow(_ error: Error) throws -> Wrapped {
+        guard let value = self else {
+            throw error
+        }
+        return value
+    }
+
+    func unwrapOrThrow() throws -> Wrapped {
+        return try unwrapOrThrow(UnwrapError.nilValue)
+    }
+}

@@ -12,13 +12,26 @@ import ComposableArchitecture
 struct HapticFeedbackDemoApp: App {
     var body: some Scene {
         WindowGroup {
-            HapticMenuApp(store: Store(
-                initialState: HapticsFeature.State(),
-                reducer: {
-                    HapticsFeature(client: .live)
-                        ._printChanges()
-                }
-            ))
+//            HapticMenuApp(store: Store(
+//                initialState: HapticsFeature.State(),
+//                reducer: {
+//                    HapticsFeature(client: .live)
+//                        ._printChanges()
+//                }
+//            ))
+//            EmptyView()
+            
+            NavigationView {
+                
+                HapticButtonView(
+                    store: Store(
+                        initialState: HapticEngineFeature.State(),
+                        reducer: {
+                            HapticEngineFeature()
+                        }
+                    )
+                ).navigationTitle("CHHapticPattern")
+            }
         }
     }
 }
