@@ -27,6 +27,7 @@ struct HapticEngineFeature: Reducer {
             ],
             parameters: []
         )
+        var formattedString: String?
     }
     
     enum Action {
@@ -42,11 +43,24 @@ struct HapticEngineFeature: Reducer {
         Reduce { state, action in
             switch action {
             case .onAppear:
+                
+//                let data   if let prettyPrintedData = try? JSONSerialization.data(withJSONObject: json, options: .prettyPrinted) {
+//try? JSONSerialization.data(withJSONObject: state.hapticPattern, options: .prettyPrinted)
+//                try NSJSONSerialization.dataWithJSONObject(props,
+//                            options: .PrettyPrinted)
+                
+                let encoder = JSONEncoder()
+                encoder.outputFormatting = .prettyPrinted
+                state.formattedString = (try? encoder.encode(state.hapticPattern))
+                    .flatMap {
+                    String(data: $0, encoding: .utf8)
+                }
+
                 return .run { send in
                     do {
-                        let engine = try await client.makeHapticEngine()
-                        try await engine.start()
+                        let engine = try client.makeHapticEngine()
                         await send(.onEngineCreation(engine))
+                        try await engine.start()
                     } catch {
                         await send(.onCreationFailed(error))
                     }
@@ -87,24 +101,27 @@ struct HapticButtonView: View {
 
     var body: some View {
         WithViewStore(store, observe: { $0 }) { viewStore in
-            VStack {
-                Text("Long label that needs to be able to wrap but isn't doing it yet.")
-                    .font(.largeTitle)
-                    .multilineTextAlignment(.center)
-                    .lineLimit(nil)
-                
-                Button(
-                    action: { viewStore.send(.onDemoButtonTapped) }
-                ) {
-                    Text("Tap Me!")
-                        .font(.headline)
-                        .padding()
-                        .foregroundColor(.white)
-                        .background(Color.blue)
-                        .cornerRadius(10)
-                }
-                .onAppear {
-                    viewStore.send(.onAppear)
+            ScrollView {
+                VStack {
+                    
+                    viewStore.formattedString.map {
+                        Text($0)
+                            .lineLimit(nil)
+                    }
+
+                    Button(
+                        action: { viewStore.send(.onDemoButtonTapped) }
+                    ) {
+                        Text("Tap Me!")
+                            .font(.headline)
+                            .padding()
+                            .foregroundColor(.white)
+                            .background(Color.blue)
+                            .cornerRadius(10)
+                    }
+                    .onAppear {
+                        viewStore.send(.onAppear)
+                    }
                 }
             }
         }

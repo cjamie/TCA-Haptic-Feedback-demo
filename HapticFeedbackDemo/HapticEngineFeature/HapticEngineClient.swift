@@ -79,8 +79,8 @@ struct HapticEngine: Equatable {
     }
 }
 
-struct HapticEvent: Equatable {
-    struct EventType: Equatable {
+struct HapticEvent: Equatable, Encodable {
+    struct EventType: Equatable, Encodable {
         let rawValue: String
         
         init(raw: CHHapticEvent.EventType) {
@@ -93,8 +93,8 @@ struct HapticEvent: Equatable {
         static let hapticTransient = EventType(raw: .hapticTransient)
     }
 
-    struct EventParameter: Equatable {
-        struct ParameterID: Equatable {
+    struct EventParameter: Equatable, Encodable {
+        struct ParameterID: Equatable, Encodable {
             let rawValue: String
             
             static let hapticIntensity = ParameterID(raw: .hapticIntensity)
@@ -141,7 +141,7 @@ struct HapticEvent: Equatable {
 
 
 // this needs to be wrapped in a try-able init.
-struct HapticPattern: Equatable {
+struct HapticPattern: Equatable, Encodable {
     let events: [HapticEvent]
     let parameters: [HapticDynamicParameter]
     
@@ -155,13 +155,21 @@ struct HapticPattern: Equatable {
             parameters: []
         )
     }
+
+    enum CodingKeys: String, CodingKey {
+        case events
+        case parameters
+    }
+//    func encode(to encoder: Encoder) throws {
+//        encoder.
+//    }
     
     var toCHHapticPattern: CHHapticPattern {
         _cHHapticPattern
     }
 }
 
-struct HapticDynamicParameter: Equatable { // CHHapticDynamicParameter
+struct HapticDynamicParameter: Equatable, Encodable { // CHHapticDynamicParameter
 //    var toCHHapticDynamicParameter: CHHapticDynamicParameter {
 //        .init(
 //            parameterID: <#T##CHHapticDynamicParameter.ID#>,

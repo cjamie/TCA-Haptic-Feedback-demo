@@ -71,6 +71,7 @@
 		5F3882E22B2982F000C807B8 /* HapticEngineFeature */ = {
 			isa = PBXGroup;
 			children = (
+				5F3882E02B29706600C807B8 /* HapticEngineFeature.swift */,
 				5F9A5ACD2B298CE7007587A7 /* HapticEngineClient.swift */,
 			);
 			path = HapticEngineFeature;
@@ -102,7 +103,6 @@
 				5FE18E5F2B290734009BD46C /* HapticFeedbackDemoApp.swift */,
 				5FE18E632B290736009BD46C /* Assets.xcassets */,
 				5FE18E652B290736009BD46C /* Preview Content */,
-				5F3882E02B29706600C807B8 /* HapticEngineFeature.swift */,
 			);
 			path = HapticFeedbackDemo;
 			sourceTree = "<group>";
