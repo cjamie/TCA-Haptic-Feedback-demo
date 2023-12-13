@@ -14,7 +14,7 @@ import CoreHaptics
 struct HapticEngineClient {
     
     let supportsHaptics: () -> Bool
-    let makeHapticEngine: () throws -> HapticEngine
+    let makeHapticEngine: () async throws -> HapticEngine
 //    let makePlayer: (HapticPattern) ->
     
     static let live: HapticEngineClient = {
@@ -90,8 +90,8 @@ struct HapticEngine: Equatable {
     }
 }
 
-struct HapticEvent {
-    struct EventType {
+struct HapticEvent: Equatable {
+    struct EventType: Equatable {
         let rawValue: String
         
         init(raw: CHHapticEvent.EventType) {
@@ -104,16 +104,10 @@ struct HapticEvent {
         static let hapticTransient = EventType(raw: .hapticTransient)
     }
 
-    let eventType: EventType
-    let parameters: [EventParameter]
-    let relativeTime: TimeInterval
-    let duration: TimeInterval
-    
-    
-    struct EventParameter {
-        struct ParameterID {
+    struct EventParameter: Equatable {
+        struct ParameterID: Equatable {
             let rawValue: String
-
+            
             static let hapticIntensity = ParameterID(raw: .hapticIntensity)
             static let hapticSharpness = ParameterID(raw: .hapticSharpness)
             static let attackTime = ParameterID(raw: .attackTime)
@@ -129,10 +123,17 @@ struct HapticEvent {
                 self.rawValue = raw.rawValue
             }
         }
-
+        
         let parameterID: ParameterID
         let value: Float
     }
+
+    let eventType: EventType
+    let parameters: [EventParameter]
+    let relativeTime: TimeInterval
+    let duration: TimeInterval
+    
+    
     
     var toCHHapticEvent: CHHapticEvent {
         .init(
@@ -151,7 +152,7 @@ struct HapticEvent {
 
 
 // this needs to be wrapped in a try-able init.
-struct HapticPattern {
+struct HapticPattern: Equatable {
     let events: [HapticEvent]
     let parameters: [HapticDynamicParameter]
     
@@ -171,7 +172,7 @@ struct HapticPattern {
     }
 }
 
-struct HapticDynamicParameter { // CHHapticDynamicParameter
+struct HapticDynamicParameter: Equatable { // CHHapticDynamicParameter
 //    var toCHHapticDynamicParameter: CHHapticDynamicParameter {
 //        .init(
 //            parameterID: <#T##CHHapticDynamicParameter.ID#>,

@@ -10,15 +10,31 @@ import SwiftUI
 import ComposableArchitecture
 
 struct HapticEngineFeature: Reducer {
-    
     struct State: Equatable {
         var engine: HapticEngine?
         var localizedError: String?
+        // TODO: - injection
+        var hapticPattern = try! HapticPattern(
+            events: [
+                HapticEvent(
+                    eventType: .hapticContinuous,
+                    parameters: [
+                        .init(parameterID: .hapticIntensity, value: 1.0),
+                        .init(parameterID: .hapticSharpness, value: 1.0),
+                    ],
+                    relativeTime: 0,
+                    duration: 1
+                )
+            ],
+            parameters: []
+        )
     }
     
     enum Action {
         case onAppear
         case onDemoButtonTapped
+        case onEngineCreation(HapticEngine)
+        case onCreationFailed(Error)
     }
     
     let client: HapticEngineClient
@@ -27,18 +43,24 @@ struct HapticEngineFeature: Reducer {
         Reduce { state, action in
             switch action {
             case .onAppear:
-                do {
-                    let engine = try client.makeHapticEngine()
-                    state.engine = engine
-                    
-                    return .run { [engine] send in
+                return .run { send in
+                    do {
+                        let engine = try await client.makeHapticEngine()
                         try await engine.start()
+                        await send(.onEngineCreation(engine))
+                    } catch {
+                        await send(.onCreationFailed(error))
                     }
-                } catch {
-                    state.localizedError = error.localizedDescription
                 }
- 
+
+            case .onCreationFailed(let error):
+                state.localizedError = error.localizedDescription
                 return .none
+                
+            case .onEngineCreation(let engine):
+                state.engine = engine
+                return .none
+
             case .onDemoButtonTapped:
                 guard client.supportsHaptics() else {
                     state.localizedError = "Device does not support haptics."
@@ -46,20 +68,10 @@ struct HapticEngineFeature: Reducer {
                 }
                 
                 do {
-                    let engine = try state.engine.unwrapOrThrow()
-                    let event = HapticEvent(
-                        eventType: .hapticContinuous,
-                        parameters: [
-                            .init(parameterID: .hapticIntensity, value: 1.0),
-                            .init(parameterID: .hapticSharpness, value: 1.0),
-                        ],
-                        relativeTime: 0,
-                        duration: 1
-                    )
-                                        
-                    let pattern = try HapticPattern(events: [event], parameters: [])
-                    let player = try engine.makePlayer(pattern)
-                    try player.start(HapticTimeImmediate)
+                    try state.engine
+                        .unwrapOrThrow()
+                        .makePlayer(state.hapticPattern)
+                        .start(HapticTimeImmediate)
                 } catch {
                     print("Error generating haptic feedback: \(error.localizedDescription)")
                 }
@@ -71,20 +83,16 @@ struct HapticEngineFeature: Reducer {
 }
 
 struct HapticButtonView: View {
+
     let store: StoreOf<HapticEngineFeature>
-    
 
     var body: some View {
-        
         WithViewStore(store, observe: { $0 }) { viewStore in
             VStack {
-                
                 Text("Long label that needs to be able to wrap but isn't doing it yet.")
                     .font(.largeTitle)
                     .multilineTextAlignment(.center)
                     .lineLimit(nil)
-                
-                
                 
                 Button(
                     action: { viewStore.send(.onDemoButtonTapped) }
