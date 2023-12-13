@@ -13,6 +13,8 @@ struct HapticEngineFeature: Reducer {
         var engine: HapticEngine?
         var localizedError: String?
         // TODO: - injection
+        
+        @BindingState
         var hapticPattern = try! HapticPattern(
             events: [
                 HapticEvent(
@@ -30,17 +32,20 @@ struct HapticEngineFeature: Reducer {
         var formattedString: String?
     }
     
-    enum Action {
+    enum Action: BindableAction {
         case onAppear
         case onDemoButtonTapped
         case onEngineCreation(HapticEngine)
         case onCreationFailed(Error)
+        
+        case binding(_ action: BindingAction<State>)
     }
     
     let client: HapticEngineClient
     let encoder = JSONEncoder.init()
 
     var body: some ReducerOf<Self> {
+        BindingReducer()
         Reduce { state, action in
             switch action {
             case .onAppear:
@@ -82,6 +87,8 @@ struct HapticEngineFeature: Reducer {
                 }
 
                 return .none
+            case .binding:
+                return .none
             }
         }
     }
@@ -96,10 +103,58 @@ struct HapticButtonView: View {
             ScrollView {
                 VStack {
                     
-                    viewStore.formattedString.map {
-                        Text($0)
-                            .lineLimit(nil)
+                    Text("Haptic Pattern detail")
+                    
+                    Section("Events") {
+                        VStack(alignment: .leading) {
+                            ForEach(viewStore.hapticPattern.events) { event in
+//                                HStack {
+//                                    Text("eventType:")
+//                                        .font(.title3)
+//                                        .background(.gray)
+//                                    Text(event.eventType.rawValue)
+//                                }
+//                                VStack(alignment: .leading) {
+//                                    Text("parameters:")
+//                                        .font(.title3)
+//                                        .background(.gray)
+//                                    
+//                                    ForEach(event.parameters, id: \.parameterID) { param in
+//                                        HStack {
+//                                            Text("eventparameer")
+//                                                .font(.title3)
+//
+//                                            Text(param.value.formatted())
+//                                        }
+//                                        .background(.green)
+//                                    }
+//                                    
+//                                }
+//
+//                                HStack {
+//                                    Text("relativeTime:")
+//                                        .font(.title3)
+//                                        .background(.gray)
+//
+//                                    Text(event.relativeTime.formatted())
+//                                }
+//
+//                                HStack {
+//                                    Text("duration:")
+//                                        .font(.title3)
+//                                        .background(.gray)
+//
+//                                    Text(event.duration.formatted())
+//                                }
+                            }
+                        }
                     }
+                    
+                    
+//                    viewStore.formattedString.map {
+//                        Text($0)
+//                            .lineLimit(nil)
+//                    }
 
                     Button(
                         action: { viewStore.send(.onDemoButtonTapped) }
@@ -130,3 +185,5 @@ struct HapticButtonView: View {
         )
     )
 }
+
+

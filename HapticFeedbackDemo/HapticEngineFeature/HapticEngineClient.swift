@@ -23,7 +23,7 @@ struct HapticEngineClient {
     )
 }
 
-struct HapticEngine: Equatable {
+struct HapticEngine: Hashable {
     let objId: ObjectIdentifier
     let start: () async throws -> Void
     let makePlayer: (HapticPattern) throws -> HapticPatternPlayer
@@ -31,30 +31,39 @@ struct HapticEngine: Equatable {
     static func == (lhs: HapticEngine, rhs: HapticEngine) -> Bool {
         lhs.objId == rhs.objId
     }
+    
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(objId)
+    }
 }
 
-struct HapticEvent: Equatable, Encodable {
-    struct EventType: Equatable, Encodable {
+struct HapticEvent: Hashable, Encodable, Identifiable {
+    struct EventType: Hashable, Encodable {
         let rawValue: String
     }
 
-    struct EventParameter: Equatable, Encodable {
-        struct ID: Equatable, Encodable {
+    struct EventParameter: Hashable, Encodable {
+        struct ID: Hashable, Encodable {
             let rawValue: String
         }
         
         let parameterID: ID
         let value: Float
     }
+    let id = UUID()
 
-    let eventType: EventType
-    let parameters: [EventParameter]
-    let relativeTime: TimeInterval
-    let duration: TimeInterval
+    var eventType: EventType
+    var parameters: [EventParameter]
+    var relativeTime: TimeInterval
+    var duration: TimeInterval
+    
+//    static let mock = 
+    
+    
 }
 
-struct HapticDynamicParameter: Equatable, Encodable {
-    struct ID: Equatable, Encodable {
+struct HapticDynamicParameter: Hashable, Encodable {
+    struct ID: Hashable, Encodable {
         let rawValue: String
     }
     

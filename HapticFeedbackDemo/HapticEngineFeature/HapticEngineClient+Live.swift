@@ -7,6 +7,32 @@
 
 import CoreHaptics
 
+// TODO: - this is unusual, since the init is throwable.
+struct HapticPattern: Equatable, Encodable {
+    var events: [HapticEvent]
+    var parameters: [HapticDynamicParameter]
+    
+    private let _cHHapticPattern: CHHapticPattern
+    
+    init(events: [HapticEvent], parameters: [HapticDynamicParameter]) throws {
+        self.events = events
+        self.parameters = parameters
+        self._cHHapticPattern = try CHHapticPattern(
+            events: events.map(\.toCHHapticEvent),
+            parameters: parameters.map(\.toCHHapticDynamicParameter)
+        )
+    }
+
+    enum CodingKeys: String, CodingKey {
+        case events
+        case parameters
+    }
+
+    var toCHHapticPattern: CHHapticPattern {
+        _cHHapticPattern
+    }
+}
+
 extension HapticEngineClient {
     static let live = HapticEngineClient(
         supportsHaptics: {
@@ -40,32 +66,6 @@ extension CHHapticEvent {
         }
         
         return "Event Type: \(eventType), Parameters: \(parameters), Relative Time: \(relativeTime), Duration: \(duration)"
-    }
-}
-
-// TODO: - this is unusual, since the init is throwable.
-struct HapticPattern: Equatable, Encodable {
-    let events: [HapticEvent]
-    let parameters: [HapticDynamicParameter]
-    
-    private let _cHHapticPattern: CHHapticPattern
-    
-    init(events: [HapticEvent], parameters: [HapticDynamicParameter]) throws {
-        self.events = events
-        self.parameters = parameters
-        self._cHHapticPattern = try CHHapticPattern(
-            events: events.map(\.toCHHapticEvent),
-            parameters: parameters.map(\.toCHHapticDynamicParameter)
-        )
-    }
-
-    enum CodingKeys: String, CodingKey {
-        case events
-        case parameters
-    }
-
-    var toCHHapticPattern: CHHapticPattern {
-        _cHHapticPattern
     }
 }
 
