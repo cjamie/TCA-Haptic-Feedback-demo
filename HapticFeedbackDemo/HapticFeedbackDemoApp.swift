@@ -27,10 +27,10 @@ struct HapticFeedbackDemoApp: App {
                     store: Store(
                         initialState: HapticEngineFeature.State(),
                         reducer: {
-                            HapticEngineFeature()
+                            HapticEngineFeature(client: .live)
                         }
                     )
-                ).navigationTitle("CHHapticPattern")
+                ).navigationTitle("Build your own!")
             }
         }
     }

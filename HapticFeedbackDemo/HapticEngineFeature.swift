@@ -21,7 +21,7 @@ struct HapticEngineFeature: Reducer {
         case onDemoButtonTapped
     }
     
-    let client = HapticEngineClient.mock
+    let client: HapticEngineClient
         
     var body: some ReducerOf<Self> {
         Reduce { state, action in
@@ -109,7 +109,7 @@ struct HapticButtonView: View {
         store: Store(
             initialState: HapticEngineFeature.State(),
             reducer: {
-                HapticEngineFeature()
+                HapticEngineFeature(client: .mock)
             }
         )
     )
