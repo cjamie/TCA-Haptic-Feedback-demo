@@ -35,11 +35,11 @@ struct HapticFeedbackDemoApp: App {
             
             HapticEventDetailView(
                 store: Store(
-                    initialState: HapticEventDetailFeature.State(
+                    initialState: EditHapticEventFeature.State(
                         event: .dynamicMock
                     ),
                     reducer: {
-                        HapticEventDetailFeature()
+                        EditHapticEventFeature()
                             ._printChanges()
                     }
                 )

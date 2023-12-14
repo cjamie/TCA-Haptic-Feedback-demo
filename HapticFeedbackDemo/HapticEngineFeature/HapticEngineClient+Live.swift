@@ -179,3 +179,23 @@ extension HapticDynamicParameter {
         )
     }
 }
+
+/*
+ 
+ let pattern = try CHHapticPattern(
+                 events: [
+                     CHHapticEvent(
+                         eventType: .hapticContinuous,
+                         parameters: [
+                             CHHapticEventParameter(parameterID: .hapticIntensity, value: 1.0),
+                             CHHapticEventParameter(parameterID: .hapticSharpness, value: 1.0)
+                         ],
+                         relativeTime: 0,
+                         duration: 1
+                     )
+                 ],
+                 parameters: []
+             )
+ 
+ 
+ */

@@ -10,21 +10,17 @@ import ComposableArchitecture
 
 
 
-struct HapticEventDetailFeature: Reducer {
+struct EditHapticEventFeature: Reducer {
     struct State: Equatable {
         @BindingState
         var event: HapticEvent
-//        var eventType: EventType
-//        var parameters: [EventParameter]
-//        var relativeTime: TimeInterval
-//        var duration: TimeInterval
-
     }
     
     enum Action: BindableAction {
         case onAppear
         case binding(_ action: BindingAction<State>)
         case onDeleteParameters(IndexSet)
+        case onRandomizeButtonTapped
     }
     
     var body: some ReducerOf<Self> {
@@ -33,12 +29,16 @@ struct HapticEventDetailFeature: Reducer {
             switch action {
             case .binding:
                 return .none
+
             case .onAppear:
                 return .none
+
             case .onDeleteParameters(let indexSet):
-                print("-=- index? \(indexSet)")
-                
                 state.event.parameters.remove(atOffsets: indexSet)
+                return .none
+
+            case .onRandomizeButtonTapped:
+                state.event = .dynamicMock
                 return .none
             }
         }
@@ -46,12 +46,11 @@ struct HapticEventDetailFeature: Reducer {
 }
 
 struct HapticEventDetailView: View {
-    let store: StoreOf<HapticEventDetailFeature>
+    let store: StoreOf<EditHapticEventFeature>
 
     var body: some View {
         WithViewStore(store, observe: {$0}) { viewStore in
             ScrollView {
-                
                 VStack(alignment: .leading, spacing: 10) {
                     Section {
                         Picker("Select an option", selection: viewStore.$event.eventType) {
@@ -98,26 +97,34 @@ struct HapticEventDetailView: View {
                         Text("duration(TimeInterval):\(viewStore.event.duration.formatted())")
                             .font(.system(size: 16, weight: .bold))
                     }
+                                        
+                    Button(action: {
+                        viewStore.send(.onRandomizeButtonTapped)
+                    }) {
+                        Text("Randomize")
+                    }
                 }
                 .onAppear {
                     viewStore.send(.onAppear)
                 }
-            }
+            }.navigationTitle("Edit Haptic Event")
         }
     }
 }
 
 #Preview {
-    HapticEventDetailView(
-        store: Store(
-            initialState: HapticEventDetailFeature.State(
-                event: .dynamicMock
-            ),
-            reducer: {
-                HapticEventDetailFeature()
-                    ._printChanges()
-            }
+    NavigationView {
+        HapticEventDetailView(
+            store: Store(
+                initialState: EditHapticEventFeature.State(
+                    event: .dynamicMock
+                ),
+                reducer: {
+                    EditHapticEventFeature()
+                        ._printChanges()
+                }
+            )
         )
-    )
-    .padding()
+        .padding()
+    }
 }
