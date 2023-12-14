@@ -43,15 +43,16 @@ struct HapticEvent: Hashable, Encodable, Identifiable {
     }
 
     struct EventParameter: Hashable, Encodable {
-        struct ID: Hashable, Encodable {
+        struct ParameterID: Hashable, Encodable {
             let rawValue: String
         }
         
-        var parameterID: ID
+        let id: UUID
+        let parameterID: ParameterID
         var value: Float
     }
-    let id = UUID()
 
+    let id: UUID
     var eventType: EventType
     var parameters: [EventParameter]
     var relativeTime: TimeInterval

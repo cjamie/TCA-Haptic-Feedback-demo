@@ -16,19 +16,23 @@ struct HapticEngineFeature: Reducer {
         
         @BindingState
         var hapticPattern = try! HapticPattern(
-            events: [
-                HapticEvent(
-                    eventType: .hapticContinuous,
-                    parameters: [
-                        .init(parameterID: .hapticIntensity, value: 1.0),
-                        .init(parameterID: .hapticSharpness, value: 1.0),
-                    ],
-                    relativeTime: 0,
-                    duration: 1
-                )
-            ],
+            events: hapticEventGen.array(of: .always(1)).run(),
+//            events: [
+//                HapticEvent(
+//                    id: UUID(),
+//                    eventType: .hapticContinuous,
+//                    parameters: [
+//                        .init(id: UUID(), parameterID: .hapticIntensity, value: 1.0),
+//                        .init(id: UUID(), parameterID: .hapticSharpness, value: 1.0),
+//                    ],
+//                    relativeTime: 0,
+//                    duration: 1
+//                )
+//            ],
             parameters: []
         )
+
+        @BindingState
         var formattedString: String?
     }
     
@@ -107,54 +111,34 @@ struct HapticButtonView: View {
                     
                     Section("Events") {
                         VStack(alignment: .leading) {
+                            
+                            
+                            // TODO: - this should be a forEach store. 
                             ForEach(viewStore.hapticPattern.events) { event in
-//                                HStack {
-//                                    Text("eventType:")
-//                                        .font(.title3)
-//                                        .background(.gray)
-//                                    Text(event.eventType.rawValue)
-//                                }
-//                                VStack(alignment: .leading) {
-//                                    Text("parameters:")
-//                                        .font(.title3)
-//                                        .background(.gray)
-//                                    
-//                                    ForEach(event.parameters, id: \.parameterID) { param in
-//                                        HStack {
-//                                            Text("eventparameer")
-//                                                .font(.title3)
-//
-//                                            Text(param.value.formatted())
-//                                        }
-//                                        .background(.green)
-//                                    }
-//                                    
-//                                }
-//
-//                                HStack {
-//                                    Text("relativeTime:")
-//                                        .font(.title3)
-//                                        .background(.gray)
-//
-//                                    Text(event.relativeTime.formatted())
-//                                }
-//
-//                                HStack {
-//                                    Text("duration:")
-//                                        .font(.title3)
-//                                        .background(.gray)
-//
-//                                    Text(event.duration.formatted())
-//                                }
+                                
+                                HapticEventDetailView(
+                                    store: Store(
+                                        initialState: EditHapticEventFeature.State(
+                                            event: event
+                                        ),
+                                        reducer: {
+                                            EditHapticEventFeature()
+                                                ._printChanges()
+                                        }
+                                    )
+                                )
+                                .padding()
                             }
                         }
                     }
                     
-                    
-//                    viewStore.formattedString.map {
-//                        Text($0)
-//                            .lineLimit(nil)
-//                    }
+                    viewStore.$formattedString.unwrap().map {
+                        TextField("Enter text here", text: $0, axis: .vertical)
+                            .padding()
+                            .background(.green)
+                            .frame(height: 200)
+                        
+                    }
 
                     Button(
                         action: { viewStore.send(.onDemoButtonTapped) }

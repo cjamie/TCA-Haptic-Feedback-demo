@@ -21,6 +21,7 @@ struct EditHapticEventFeature: Reducer {
         case binding(_ action: BindingAction<State>)
         case onDeleteParameters(IndexSet)
         case onRandomizeButtonTapped
+        case onAddParameterButtonTapped
     }
     
     var body: some ReducerOf<Self> {
@@ -39,6 +40,23 @@ struct EditHapticEventFeature: Reducer {
 
             case .onRandomizeButtonTapped:
                 state.event = .dynamicMock
+                return .none
+            case .onAddParameterButtonTapped:
+                var counter = state.event.parameters.map(\.parameterID)
+                
+                let all = Set(HapticEvent.EventParameter.ParameterID.allCases)
+                
+                let eligible = all.subtracting(counter)
+                
+                let makeNewParameterWithId: (HapticEvent.EventParameter.ParameterID) -> HapticEvent.EventParameter = { _ in fatalError() }
+                
+//                if let unUsedParameterId = eligible.randomElement() {
+//                    state.event.parameters.append(makeNewParameterWithId(unUsedParameterId))
+//                } else {
+//                    state.
+//                }
+                
+                
                 return .none
             }
         }
@@ -80,29 +98,38 @@ struct HapticEventDetailView: View {
                             }
                         }.frame(height: 300)
                     } header: {
-                        Text("parameters([CHHapticEventParameter]):")
-                            .font(.system(size: 16, weight: .bold))
+                        
+                        HStack {
+                            Text("parameters([CHHapticEventParameter]):")
+                                .font(.system(size: 16, weight: .bold))
+                            
+                            Button(action: {
+                                viewStore.send(.onAddParameterButtonTapped)
+                            }, label: {
+                                Text("add")
+                            })
+                        }
                     }
                     
-                    Section {
-                        Slider(value: viewStore.$event.relativeTime, in: 0...10)
-                    } header: {
-                        Text("relativeTime(TimeInterval): \(viewStore.event.relativeTime.formatted())")
-                            .font(.system(size: 16, weight: .bold))
-                    }
-                    
-                    Section {
-                        Slider(value: viewStore.$event.duration, in: 0...10)
-                    } header: {
-                        Text("duration(TimeInterval):\(viewStore.event.duration.formatted())")
-                            .font(.system(size: 16, weight: .bold))
-                    }
-                                        
-                    Button(action: {
-                        viewStore.send(.onRandomizeButtonTapped)
-                    }) {
-                        Text("Randomize")
-                    }
+//                    Section {
+//                        Slider(value: viewStore.$event.relativeTime, in: 0...10)
+//                    } header: {
+//                        Text("relativeTime(TimeInterval): \(viewStore.event.relativeTime.formatted())")
+//                            .font(.system(size: 16, weight: .bold))
+//                    }
+//                    
+//                    Section {
+//                        Slider(value: viewStore.$event.duration, in: 0...10)
+//                    } header: {
+//                        Text("duration(TimeInterval):\(viewStore.event.duration.formatted())")
+//                            .font(.system(size: 16, weight: .bold))
+//                    }
+//                                        
+//                    Button(action: {
+//                        viewStore.send(.onRandomizeButtonTapped)
+//                    }) {
+//                        Text("Randomize")
+//                    }
                 }
                 .onAppear {
                     viewStore.send(.onAppear)

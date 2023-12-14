@@ -102,15 +102,15 @@ extension HapticEvent.EventType {
     
     static var allCases: [Self] {
         [
-            audioContinuous,
-            audioCustom,
+//            audioContinuous,
+//            audioCustom,
             hapticContinuous,
             hapticTransient,
         ]
     }
 }
 
-extension HapticEvent.EventParameter.ID {
+extension HapticEvent.EventParameter.ParameterID {
     init(raw: CHHapticEvent.ParameterID) {
         self.rawValue = raw.rawValue
     }
