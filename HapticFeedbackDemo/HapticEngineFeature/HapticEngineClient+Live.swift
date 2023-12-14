@@ -73,14 +73,19 @@ extension HapticEvent {
     var toCHHapticEvent: CHHapticEvent {
         .init(
             eventType: CHHapticEvent.EventType(rawValue: eventType.rawValue),
-            parameters: parameters.map { domain in
-                CHHapticEventParameter(
-                    parameterID: CHHapticEvent.ParameterID(rawValue: domain.parameterID.rawValue),
-                    value: domain.value
-                )
-            },
+            parameters: parameters.map(\.toCHHapticEventParameter),
             relativeTime: 0,
             duration: 1
+        )
+    }
+}
+
+
+extension HapticEvent.EventParameter {
+    var toCHHapticEventParameter: CHHapticEventParameter {
+        CHHapticEventParameter(
+            parameterID: CHHapticEvent.ParameterID(rawValue: parameterID.rawValue),
+            value: value
         )
     }
 }
@@ -94,6 +99,15 @@ extension HapticEvent.EventType {
     static let audioCustom = Self(raw: .audioCustom)
     static let hapticContinuous = Self(raw: .hapticContinuous)
     static let hapticTransient = Self(raw: .hapticTransient)
+    
+    static var allCases: [Self] {
+        [
+            audioContinuous,
+            audioCustom,
+            hapticContinuous,
+            hapticTransient,
+        ]
+    }
 }
 
 extension HapticEvent.EventParameter.ID {
@@ -111,6 +125,21 @@ extension HapticEvent.EventParameter.ID {
     static let decayTime = Self(raw: .decayTime)
     static let releaseTime = Self(raw: .releaseTime)
     static let sustained = Self(raw: .sustained)
+    
+    static var allCases: [Self] {
+        [
+            hapticIntensity,
+            hapticSharpness,
+            attackTime,
+            audioBrightness,
+            audioPan,
+            audioPitch,
+            audioVolume,
+            decayTime,
+            releaseTime,
+            sustained,
+        ]        
+    }
 }
 
 let HapticTimeImmediate = CoreHaptics.CHHapticTimeImmediate

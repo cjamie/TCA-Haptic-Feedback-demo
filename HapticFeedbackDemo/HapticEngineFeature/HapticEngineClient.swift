@@ -11,7 +11,7 @@ struct HapticEngineClient {
     let supportsHaptics: () -> Bool
     let makeHapticEngine: () throws -> HapticEngine
     
-    static let mock =  HapticEngineClient(
+    static let mock = HapticEngineClient(
         supportsHaptics: { true },
         makeHapticEngine: {
             HapticEngine(
@@ -57,9 +57,11 @@ struct HapticEvent: Hashable, Encodable, Identifiable {
     var relativeTime: TimeInterval
     var duration: TimeInterval
     
-//    static let mock = 
-    
-    
+    static let mock = hapticEventGen.run()
+
+    static var dynamicMock: HapticEvent {
+        hapticEventGen.run()
+    }
 }
 
 struct HapticDynamicParameter: Hashable, Encodable {

@@ -33,57 +33,57 @@ struct HapticEventDetailView: View {
 
     var body: some View {
         WithViewStore(store, observe: {$0}) { viewStore in
-            HStack {
-                Text("eventType:")
-                    .font(.title3)
-                    .background(.gray)
-                Text(viewStore.event.eventType.rawValue)
-            }
-            VStack(alignment: .leading) {
-                Text("parameters:")
-                    .font(.title3)
-                    .background(.gray)
-                
-                ForEach(viewStore.event.parameters, id: \.parameterID) { param in
-                    HStack {
-                        Text("eventparameer")
-                            .font(.title3)
+            VStack(alignment: .leading, spacing: 10) {
+                Section {
+                    Text(viewStore.event.eventType.rawValue)
+                        .padding([.leading, .trailing], 8)
+                } header: {
+                    Text("eventType(CHHapticEvent):")
+                        .font(.system(size: 16, weight: .bold))
+                }
 
-                        Text(param.value.formatted())
+                Section {
+                    ForEach(viewStore.event.parameters, id: \.parameterID) { param in
+                        VStack(alignment: .leading) {
+                            Text("value(Float): " + param.value.formatted())
+                            Text("parameterID(CHHapticEvent.ParameterID): " + param.parameterID.rawValue)
+                        }
+                        .padding([.leading, .trailing], 8)
                     }
-                    .background(.green)
+                } header: {
+                    Text("parameters([CHHapticEventParameter]):")
+                        .font(.system(size: 16, weight: .bold))
                 }
                 
-            }
-
-            HStack {
-                Text("relativeTime:")
-                    .font(.title3)
-                    .background(.gray)
-
-                Text(viewStore.event.relativeTime.formatted())
-            }
-
-            HStack {
-                Text("duration:")
-                    .font(.title3)
-                    .background(.gray)
-
-                Text(viewStore.event.duration.formatted())
+                Section {
+                    Text(viewStore.event.relativeTime.formatted())
+                        .padding([.leading, .trailing], 8)
+                } header: {
+                    Text("relativeTime(TimeInterval):")
+                        .font(.system(size: 16, weight: .bold))
+                }
+                
+                Section {
+                    Text(viewStore.event.duration.formatted())
+                        .padding([.leading, .trailing], 8)
+                } header: {
+                    Text("duration(TimeInterval):")
+                        .font(.system(size: 16, weight: .bold))
+                }
             }
         }
     }
 }
-//
-//#Preview {
-//    HapticEventDetailView(
-//        store: Store(
-//            initialState: HapticEventDetailFeature.State(
-//                event: .init(eventType: <#T##HapticEvent.EventType#>, parameters: <#T##[HapticEvent.EventParameter]#>, relativeTime: <#T##TimeInterval#>, duration: <#T##TimeInterval#>)
-//            ),
-//            reducer: {
-//                HapticEventDetailFeature()
-//            }
-//        )
-//    )
-//}
+
+#Preview {
+    HapticEventDetailView(
+        store: Store(
+            initialState: HapticEventDetailFeature.State(
+                event: .dynamicMock
+            ),
+            reducer: {
+                HapticEventDetailFeature()
+            }
+        )
+    )
+}
