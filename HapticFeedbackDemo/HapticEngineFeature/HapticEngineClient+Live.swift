@@ -131,14 +131,17 @@ extension HapticEvent.EventParameter.ID {
             hapticIntensity,
             hapticSharpness,
             attackTime,
-            audioBrightness,
-            audioPan,
-            audioPitch,
-            audioVolume,
             decayTime,
             releaseTime,
             sustained,
-        ]        
+
+            // these are audio, not haptic.
+
+            //            audioBrightness,
+            //            audioPan,
+            //            audioPitch,
+            //            audioVolume,
+        ]
     }
 }
 

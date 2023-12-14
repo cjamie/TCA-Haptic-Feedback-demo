@@ -12,17 +12,34 @@ import ComposableArchitecture
 
 struct HapticEventDetailFeature: Reducer {
     struct State: Equatable {
-        let event: HapticEvent
+        @BindingState
+        var event: HapticEvent
+//        var eventType: EventType
+//        var parameters: [EventParameter]
+//        var relativeTime: TimeInterval
+//        var duration: TimeInterval
+
     }
     
-    enum Action {
-        
+    enum Action: BindableAction {
+        case onAppear
+        case binding(_ action: BindingAction<State>)
+        case onDeleteParameters(IndexSet)
     }
     
     var body: some ReducerOf<Self> {
+        BindingReducer()
         Reduce { state, action in
             switch action {
+            case .binding:
+                return .none
+            case .onAppear:
+                return .none
+            case .onDeleteParameters(let indexSet):
+                print("-=- index? \(indexSet)")
                 
+                state.event.parameters.remove(atOffsets: indexSet)
+                return .none
             }
         }
     }
@@ -33,42 +50,57 @@ struct HapticEventDetailView: View {
 
     var body: some View {
         WithViewStore(store, observe: {$0}) { viewStore in
-            VStack(alignment: .leading, spacing: 10) {
-                Section {
-                    Text(viewStore.event.eventType.rawValue)
-                        .padding([.leading, .trailing], 8)
-                } header: {
-                    Text("eventType(CHHapticEvent):")
-                        .font(.system(size: 16, weight: .bold))
-                }
-
-                Section {
-                    ForEach(viewStore.event.parameters, id: \.parameterID) { param in
-                        VStack(alignment: .leading) {
-                            Text("value(Float): " + param.value.formatted())
-                            Text("parameterID(CHHapticEvent.ParameterID): " + param.parameterID.rawValue)
+            ScrollView {
+                
+                VStack(alignment: .leading, spacing: 10) {
+                    Section {
+                        Picker("Select an option", selection: viewStore.$event.eventType) {
+                            ForEach(HapticEvent.EventType.allCases, id: \.self) { option in
+                                Text(option.rawValue)
+                                    .padding([.leading, .trailing], 8)
+                            }
                         }
-                        .padding([.leading, .trailing], 8)
+                        .pickerStyle(.wheel)
+                    } header: {
+                        Text("eventType(CHHapticEvent): \(viewStore.event.eventType.rawValue)")
+                            .font(.system(size: 16, weight: .bold))
                     }
-                } header: {
-                    Text("parameters([CHHapticEventParameter]):")
-                        .font(.system(size: 16, weight: .bold))
+                    
+                    Section {
+                        List {
+                            ForEach(viewStore.$event.parameters, id: \.parameterID) { param in
+                                VStack(alignment: .leading) {
+                                    Slider(value: param.value, in: 0...1)
+                                    Text("value(Float): " + param.wrappedValue.value.formatted())
+                                    Text("parameterID(CHHapticEvent.ParameterID): " + param.wrappedValue.parameterID.rawValue)
+                                }
+                                .padding([.leading, .trailing], 8)
+                            }
+                            .onDelete {
+                                viewStore.send(.onDeleteParameters($0))
+                            }
+                        }.frame(height: 300)
+                    } header: {
+                        Text("parameters([CHHapticEventParameter]):")
+                            .font(.system(size: 16, weight: .bold))
+                    }
+                    
+                    Section {
+                        Slider(value: viewStore.$event.relativeTime, in: 0...10)
+                    } header: {
+                        Text("relativeTime(TimeInterval): \(viewStore.event.relativeTime.formatted())")
+                            .font(.system(size: 16, weight: .bold))
+                    }
+                    
+                    Section {
+                        Slider(value: viewStore.$event.duration, in: 0...10)
+                    } header: {
+                        Text("duration(TimeInterval):\(viewStore.event.duration.formatted())")
+                            .font(.system(size: 16, weight: .bold))
+                    }
                 }
-                
-                Section {
-                    Text(viewStore.event.relativeTime.formatted())
-                        .padding([.leading, .trailing], 8)
-                } header: {
-                    Text("relativeTime(TimeInterval):")
-                        .font(.system(size: 16, weight: .bold))
-                }
-                
-                Section {
-                    Text(viewStore.event.duration.formatted())
-                        .padding([.leading, .trailing], 8)
-                } header: {
-                    Text("duration(TimeInterval):")
-                        .font(.system(size: 16, weight: .bold))
+                .onAppear {
+                    viewStore.send(.onAppear)
                 }
             }
         }
@@ -83,7 +115,9 @@ struct HapticEventDetailView: View {
             ),
             reducer: {
                 HapticEventDetailFeature()
+                    ._printChanges()
             }
         )
     )
+    .padding()
 }

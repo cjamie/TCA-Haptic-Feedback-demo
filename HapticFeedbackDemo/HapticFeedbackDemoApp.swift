@@ -21,17 +21,30 @@ struct HapticFeedbackDemoApp: App {
 //            ))
 //            EmptyView()
             
-            NavigationView {
-                
-                HapticButtonView(
-                    store: Store(
-                        initialState: HapticEngineFeature.State(),
-                        reducer: {
-                            HapticEngineFeature(client: .live)
-                        }
-                    )
-                ).navigationTitle("Build your own!")
-            }
+//            NavigationView {
+//                
+//                HapticButtonView(
+//                    store: Store(
+//                        initialState: HapticEngineFeature.State(),
+//                        reducer: {
+//                            HapticEngineFeature(client: .live)
+//                        }
+//                    )
+//                ).navigationTitle("Build your own!")
+//            }
+            
+            HapticEventDetailView(
+                store: Store(
+                    initialState: HapticEventDetailFeature.State(
+                        event: .dynamicMock
+                    ),
+                    reducer: {
+                        HapticEventDetailFeature()
+                            ._printChanges()
+                    }
+                )
+            )
+            .padding()
         }
     }
 }

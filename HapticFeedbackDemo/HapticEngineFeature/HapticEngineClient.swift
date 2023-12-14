@@ -47,8 +47,8 @@ struct HapticEvent: Hashable, Encodable, Identifiable {
             let rawValue: String
         }
         
-        let parameterID: ID
-        let value: Float
+        var parameterID: ID
+        var value: Float
     }
     let id = UUID()
 
