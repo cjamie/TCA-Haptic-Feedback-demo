@@ -17,6 +17,7 @@ struct HapticsFeature: Reducer {
         
         @BindingState
         var intensity: CGFloat?
+        var supportsHaptics = false
         
         var userAudit: String?
         var supportsHapticsTitle = ""
@@ -61,6 +62,7 @@ struct HapticsFeature: Reducer {
                 return .none
                 
             case .onAppear:
+                state.supportsHaptics = client.supportsHaptics()
                 state.supportsHapticsTitle = "SupportsHaptics: \(client.supportsHaptics())"
                 return .none
                 
@@ -106,6 +108,7 @@ struct HapticMenuApp: View {
                     Text("Haptic Menu App: \(viewStore.selectedHapticType.rawValue)")
                         .font(.title)
                     Text(viewStore.supportsHapticsTitle)
+                        .foregroundStyle(viewStore.supportsHaptics ? .green : .red)
                     
                     if case .feedback = viewStore.selectedHapticType.category {
                         VStack {
@@ -124,7 +127,7 @@ struct HapticMenuApp: View {
                         .padding()
                     }
                     
-                    VStack(spacing: 20) {
+                    VStack {
                         ForEach(HapticType.allCases, id: \.self) { hapticType in
                             Button(action: {
                                 viewStore.send(.onHapticTapped(hapticType))
@@ -159,7 +162,6 @@ struct HapticMenuApp: View {
                             .padding()
                     }
                 }
-                .padding(.zero)
                 .navigationTitle("Haptic Demo")
             }
         }

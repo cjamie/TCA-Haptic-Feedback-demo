@@ -7,6 +7,7 @@
 
 import Foundation
 
+
 struct HapticEngineClient {
     let supportsHaptics: () -> Bool
     let makeHapticEngine: () throws -> HapticEngine
@@ -17,12 +18,24 @@ struct HapticEngineClient {
             HapticEngine(
                 objId: ObjectIdentifier(NSObject()),
                 start: {},
-                makePlayer: { _ in .init(start: { _ in }) }
+                makePlayer: { _ in .init { _ in } }
             )
         }
     )
 }
 
+// CHHapticPattern
+struct HapticPattern: Equatable, Encodable {
+    var events: [HapticEvent]
+    var parameters: [HapticDynamicParameter]
+    
+    init(events: [HapticEvent], parameters: [HapticDynamicParameter]) throws {
+        self.events = events
+        self.parameters = parameters
+    }
+}
+
+// CHHapticEngine
 struct HapticEngine: Hashable {
     let objId: ObjectIdentifier
     let start: () async throws -> Void
@@ -37,21 +50,29 @@ struct HapticEngine: Hashable {
     }
 }
 
+// CHHapticEvent
 struct HapticEvent: Hashable, Encodable, Identifiable {
+
+    // CHHapticEvent.EventType
     struct EventType: Hashable, Encodable {
         let rawValue: String
     }
 
+    // CHHapticEventParameter
     struct EventParameter: Hashable, Encodable {
+
+        // CHHapticEvent.ParameterID
         struct ParameterID: Hashable, Encodable {
             let rawValue: String
         }
         
         let id: UUID
+        
         let parameterID: ParameterID
         var value: Float
     }
 
+    
     let id: UUID
     var eventType: EventType
     var parameters: [EventParameter]
@@ -65,7 +86,10 @@ struct HapticEvent: Hashable, Encodable, Identifiable {
     }
 }
 
+// CHHapticDynamicParameter
 struct HapticDynamicParameter: Hashable, Encodable {
+    
+    //CHHapticDynamicParameter.ID
     struct ID: Hashable, Encodable {
         let rawValue: String
     }
@@ -75,6 +99,7 @@ struct HapticDynamicParameter: Hashable, Encodable {
     let relativeTime: TimeInterval
 }
 
+// CHHapticPatternPlayer
 struct HapticPatternPlayer {
     let start: (TimeInterval) throws -> Void
 }

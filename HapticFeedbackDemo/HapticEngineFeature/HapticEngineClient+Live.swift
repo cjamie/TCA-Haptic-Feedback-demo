@@ -7,31 +7,7 @@
 
 import CoreHaptics
 
-// TODO: - this is unusual, since the init is throwable.
-struct HapticPattern: Equatable, Encodable {
-    var events: [HapticEvent]
-    var parameters: [HapticDynamicParameter]
-    
-    private let _cHHapticPattern: CHHapticPattern
-    
-    init(events: [HapticEvent], parameters: [HapticDynamicParameter]) throws {
-        self.events = events
-        self.parameters = parameters
-        self._cHHapticPattern = try CHHapticPattern(
-            events: events.map(\.toCHHapticEvent),
-            parameters: parameters.map(\.toCHHapticDynamicParameter)
-        )
-    }
 
-    enum CodingKeys: String, CodingKey {
-        case events
-        case parameters
-    }
-
-    var toCHHapticPattern: CHHapticPattern {
-        _cHHapticPattern
-    }
-}
 
 extension HapticEngineClient {
     static let live = HapticEngineClient(
@@ -45,7 +21,7 @@ extension HapticEngineClient {
                 objId: ObjectIdentifier(realEngine),
                 start: realEngine.start,
                 makePlayer: { pattern in
-                    let player = try realEngine.makePlayer(with: pattern.toCHHapticPattern)
+                    let player = try realEngine.makePlayer(with: pattern.toCHHapticPattern())
                     
                     return .init(start: { time in
                         try player.start(atTime: time)
@@ -54,6 +30,16 @@ extension HapticEngineClient {
             )
         }
     )
+}
+
+extension HapticPattern {
+    func toCHHapticPattern() throws -> CHHapticPattern {
+        try CHHapticPattern(
+            events: events.map(\.toCHHapticEvent),
+            parameters: parameters.map(\.toCHHapticDynamicParameter)
+        )
+    }
+
 }
 
 extension CHHapticEvent {
@@ -79,7 +65,6 @@ extension HapticEvent {
         )
     }
 }
-
 
 extension HapticEvent.EventParameter {
     var toCHHapticEventParameter: CHHapticEventParameter {

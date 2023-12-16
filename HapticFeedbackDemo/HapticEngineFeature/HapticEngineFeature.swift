@@ -46,7 +46,7 @@ struct HapticEngineFeature: Reducer {
     }
     
     let client: HapticEngineClient
-    let encoder = JSONEncoder.init()
+    let encoder = JSONEncoder()
 
     var body: some ReducerOf<Self> {
         BindingReducer()

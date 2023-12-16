@@ -4,7 +4,7 @@
 //
 //  Created by Jamie Chu on 12/12/23.
 //
-
+import CoreHaptics
 // Public interface for haptics, hides the dependency on CoreHaptics
 struct HapticsClient {
     let supportsHaptics: () -> Bool
