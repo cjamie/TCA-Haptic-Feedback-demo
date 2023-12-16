@@ -44,11 +44,11 @@ struct EditHapticEventFeature: Reducer {
             case .onAddParameterButtonTapped:
                 var counter = state.event.parameters.map(\.parameterID)
                 
-                let all = Set(HapticEvent.EventParameter.ParameterID.allCases)
-                
-                let eligible = all.subtracting(counter)
-                
-                let makeNewParameterWithId: (HapticEvent.EventParameter.ParameterID) -> HapticEvent.EventParameter = { _ in fatalError() }
+//                let all = Set(HapticEvent.EventParameter.ParameterID.allCases)
+//                
+//                let eligible = all.subtracting(counter)
+//                
+//                let makeNewParameterWithId: (HapticEvent.EventParameter.ParameterID) -> HapticEvent.EventParameter = { _ in fatalError() }
                 
 //                if let unUsedParameterId = eligible.randomElement() {
 //                    state.event.parameters.append(makeNewParameterWithId(unUsedParameterId))
@@ -85,9 +85,9 @@ struct HapticEventDetailView: View {
                     
                     Section {
                         List {
-                            ForEach(viewStore.$event.parameters, id: \.parameterID) { param in
+                            ForEach(viewStore.$event.parameters, id: \.id) { param in
                                 VStack(alignment: .leading) {
-                                    Slider(value: param.value, in: 0...1)
+                                    Slider(value: param.value, in: param.wrappedValue.range)
                                     Text("value(Float): " + param.wrappedValue.value.formatted())
                                     Text("parameterID(CHHapticEvent.ParameterID): " + param.wrappedValue.parameterID.rawValue)
                                 }

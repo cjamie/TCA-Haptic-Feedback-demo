@@ -16,18 +16,30 @@ struct HapticEngineFeature: Reducer {
         
         @BindingState
         var hapticPattern = try! HapticPattern(
-            events: hapticEventGen.array(of: .always(1)).run(),
+//            events: hapticEventGen.array(of: .always(1)).run(),
+            events: [
+                HapticEvent(
+                    id: UUID(),
+                    eventType: .hapticContinuous,
+                    parameters: [
+//                        .init(id: UUID(), parameterID: .hapticIntensity, value: 1.0, range: 0...1),
+//                        .init(id: UUID(), parameterID: .hapticSharpness, value: 1.0, range: 0...1),
+//                        .init(id: UUID(), parameterID: .attackTime, value: 1.0, range: 0...1)
+//                        .init(id: UUID(), parameterID: .audioBrightness, value: 1.0, range: 0...1),
+//                        .init(id: UUID(), parameterID: .audioPan, value: 1.0, range: 0...1),
+//                        .init(id: UUID(), parameterID: .audioPitch, value: 1.0, range: 0...1),
+                        .init(id: UUID(), parameterID: .audioVolume, value: 1.0, range: 0...1),
+//                        .init(id: UUID(), parameterID: .decayTime, value: 1.0, range: 0...1),
+//                        .init(id: UUID(), parameterID: .releaseTime, value: 1.0, range: 0...1),
+//                        .init(id: UUID(), parameterID: .sustained, value: 1.0, range: 0...1),
+
+                    ],
+                    relativeTime: 0,
+                    duration: 1
+                )
+            ],
 //            events: [
-//                HapticEvent(
-//                    id: UUID(),
-//                    eventType: .hapticContinuous,
-//                    parameters: [
-//                        .init(id: UUID(), parameterID: .hapticIntensity, value: 1.0),
-//                        .init(id: UUID(), parameterID: .hapticSharpness, value: 1.0),
-//                    ],
-//                    relativeTime: 0,
-//                    duration: 1
-//                )
+//                
 //            ],
             parameters: []
         )
@@ -50,6 +62,17 @@ struct HapticEngineFeature: Reducer {
 
     var body: some ReducerOf<Self> {
         BindingReducer()
+            .onChange(of: \.$hapticPattern) { _, newValue in
+                Reduce { state, _ in
+                    
+                    print("-=- z... ")
+                    encoder.outputFormatting = .prettyPrinted
+                    state.formattedString = (try? encoder.encode(newValue))
+                        .flatMap { String(data: $0, encoding: .utf8) }
+
+                    return .none
+                }
+            }
         Reduce { state, action in
             switch action {
             case .onAppear:
@@ -76,6 +99,8 @@ struct HapticEngineFeature: Reducer {
                 return .none
 
             case .onDemoButtonTapped:
+                state.localizedError = nil
+
                 guard client.supportsHaptics() else {
                     state.localizedError = "Device does not support haptics."
                     return .none
@@ -87,7 +112,7 @@ struct HapticEngineFeature: Reducer {
                         .makePlayer(state.hapticPattern)
                         .start(HapticTimeImmediate)
                 } catch {
-                    print("Error generating haptic feedback: \(error.localizedDescription)")
+                    state.localizedError = "Error generating haptic feedback: \(error.localizedDescription)"
                 }
 
                 return .none
@@ -106,16 +131,12 @@ struct HapticButtonView: View {
         WithViewStore(store, observe: { $0 }) { viewStore in
             ScrollView {
                 VStack {
-                    
-                    Text("Haptic Pattern detail")
-                    
+                    Text(viewStore.localizedError ?? "Haptic Pattern detail")
+                        
                     Section("Events") {
                         VStack(alignment: .leading) {
-                            
-                            
-                            // TODO: - this should be a forEach store. 
+                            // TODO: - this needs a foreach store
                             ForEach(viewStore.hapticPattern.events) { event in
-                                
                                 HapticEventDetailView(
                                     store: Store(
                                         initialState: EditHapticEventFeature.State(
@@ -132,6 +153,7 @@ struct HapticButtonView: View {
                         }
                     }
                     
+                    // TODO: - handle focus state changes (because of keyboard)
                     viewStore.$formattedString.unwrap().map {
                         TextField("Enter text here", text: $0, axis: .vertical)
                             .padding()

@@ -39,7 +39,6 @@ extension HapticPattern {
             parameters: parameters.map(\.toCHHapticDynamicParameter)
         )
     }
-
 }
 
 extension CHHapticEvent {
@@ -100,34 +99,54 @@ extension HapticEvent.EventParameter.ParameterID {
         self.rawValue = raw.rawValue
     }
 
+    // MARK: - Haptic Event Parameter IDs
+
     static let hapticIntensity = Self(raw: .hapticIntensity)
     static let hapticSharpness = Self(raw: .hapticSharpness)
     static let attackTime = Self(raw: .attackTime)
-    static let audioBrightness = Self(raw: .audioBrightness)
-    static let audioPan = Self(raw: .audioPan)
-    static let audioPitch = Self(raw: .audioPitch)
-    static let audioVolume = Self(raw: .audioVolume)
     static let decayTime = Self(raw: .decayTime)
     static let releaseTime = Self(raw: .releaseTime)
     static let sustained = Self(raw: .sustained)
     
-    static var allCases: [Self] {
-        [
-            hapticIntensity,
-            hapticSharpness,
-            attackTime,
-            decayTime,
-            releaseTime,
-            sustained,
+    // MARK: - Audio Event Parameter IDs
 
-            // these are audio, not haptic.
-
-            //            audioBrightness,
-            //            audioPan,
-            //            audioPitch,
-            //            audioVolume,
-        ]
-    }
+    static let audioBrightness = Self(raw: .audioBrightness)
+    static let audioPan = Self(raw: .audioPan)
+    static let audioPitch = Self(raw: .audioPitch)
+    static let audioVolume = Self(raw: .audioVolume)
+    
+//    @available(*, deprecated, message: "use allCasesWithRanges instead")
+//    static var allCases: [Self] {
+//        [
+//            hapticIntensity,
+//            hapticSharpness,
+//            attackTime,
+//            decayTime,
+//            releaseTime,
+//            sustained,
+//
+//            // these are audio, not haptic.
+//
+//            //            audioBrightness,
+//            //            audioPan,
+//            //            audioPitch,
+//            //            audioVolume,
+//        ]
+//    }
+//    
+    static let allCasesWithRanges: [(Self, ClosedRange<Float>)] = [
+        (hapticIntensity, 0...1),
+        (hapticSharpness, 0...1),
+        (attackTime, -1...1),
+        (decayTime, -1...1),
+        (releaseTime, 0...1),
+//        (sustained, 0...1), Weird... apple docs said this should be a bool
+        
+        (audioBrightness, 0...1),
+        (audioPan, -1...1),
+        (audioPitch, -1...1),
+        (audioVolume, 0...1),
+    ]
 }
 
 let HapticTimeImmediate = CoreHaptics.CHHapticTimeImmediate
@@ -184,3 +203,8 @@ extension HapticDynamicParameter {
  
  
  */
+
+func zz() {
+    let sustainTime = CHHapticEventParameter(parameterID: .sustained, value: 1) // If you want to sustain the haptic for its entire duration.
+
+}

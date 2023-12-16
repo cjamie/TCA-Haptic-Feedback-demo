@@ -66,10 +66,10 @@ struct HapticEvent: Hashable, Encodable, Identifiable {
             let rawValue: String
         }
         
-        let id: UUID
-        
+        let id: UUID        
         let parameterID: ParameterID
         var value: Float
+        let range: ClosedRange<Float>
     }
 
     
@@ -84,6 +84,13 @@ struct HapticEvent: Hashable, Encodable, Identifiable {
     static var dynamicMock: HapticEvent {
         hapticEventGen.run()
     }
+    
+//    enum CodingKeys: CodingKey {
+//        case eventType
+//        case parameters
+//        case relativeTime
+//        case duration
+//    }
 }
 
 // CHHapticDynamicParameter
