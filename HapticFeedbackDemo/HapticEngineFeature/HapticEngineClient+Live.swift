@@ -183,20 +183,149 @@ extension HapticDynamicParameter {
 
 
 extension CHHapticPatternKey {
-    static let event = CHHapticPatternKey(rawValue: CHHapticPattern.Key.event.rawValue)
-    static let eventDuration = CHHapticPatternKey(rawValue: CHHapticPattern.Key.eventDuration.rawValue)
-    static let eventParameters = CHHapticPatternKey(rawValue: CHHapticPattern.Key.eventParameters.rawValue)
-    static let eventType = CHHapticPatternKey(rawValue: CHHapticPattern.Key.eventType.rawValue)
-    static let eventWaveformLoopEnabled = CHHapticPatternKey(rawValue: CHHapticPattern.Key.eventWaveformLoopEnabled.rawValue)
-    static let eventWaveformUseVolumeEnvelope = CHHapticPatternKey(rawValue: CHHapticPattern.Key.eventWaveformUseVolumeEnvelope.rawValue)
-    static let parameter = CHHapticPatternKey(rawValue: CHHapticPattern.Key.parameter.rawValue)
-    static let parameterCurve = CHHapticPatternKey(rawValue: CHHapticPattern.Key.parameterCurve.rawValue)
-    static let parameterCurveControlPoints = CHHapticPatternKey(rawValue: CHHapticPattern.Key.parameterCurveControlPoints.rawValue)
-    static let parameterID = CHHapticPatternKey(rawValue: CHHapticPattern.Key.parameterID.rawValue)
-    static let parameterValue = CHHapticPatternKey(rawValue: CHHapticPattern.Key.parameterValue.rawValue)
-    static let pattern = CHHapticPatternKey(rawValue: CHHapticPattern.Key.pattern.rawValue)
-    static let time = CHHapticPatternKey(rawValue: CHHapticPattern.Key.time.rawValue)
-    static let version = CHHapticPatternKey(rawValue: CHHapticPattern.Key.version.rawValue)
+    /*     
+     {
+     "Event": "Time": 0.0,
+         "EventType": "HapticTransient",
+         "EventParameters":
+         [
+             { "ParameterID": "HapticIntensity", "ParameterValue": 1.0 },
+             { "ParameterID": "HapticSharpness", "ParameterValue": 0.0 }
+         ]
+     }
+     
+     */
+    static let event = Self(rawValue: CHHapticPattern.Key.event.rawValue)
+    
+    /*
+     "EventDuration": 0.60,
+     */
+    static let eventDuration = Self(rawValue: CHHapticPattern.Key.eventDuration.rawValue)
+    
+    /*
+     "EventParameters":
+     [
+         { "ParameterID": "HapticIntensity", "ParameterValue": 1.0 },
+         { "ParameterID": "HapticSharpness", "ParameterValue": 0.0 }
+     ]
+     */
+    static let eventParameters = Self(rawValue: CHHapticPattern.Key.eventParameters.rawValue)
+    
+    
+    /*
+     "EventType": "HapticTransient",
+     */
+    static let eventType = Self(rawValue: CHHapticPattern.Key.eventType.rawValue)
+    
+    /*
+     This is iOS 15+
+     should be a boolean
+     */
+    static let eventWaveformLoopEnabled = Self(rawValue: CHHapticPattern.Key.eventWaveformLoopEnabled.rawValue)
+    
+    // This is iOS 15+, and not being used anywhere..
+    static let eventWaveformUseVolumeEnvelope = Self(rawValue: CHHapticPattern.Key.eventWaveformUseVolumeEnvelope.rawValue)
+
+    static let parameter = Self(rawValue: CHHapticPattern.Key.parameter.rawValue)
+    
+    /*
+     "ParameterCurve":
+     {
+         "ParameterID": "HapticIntensityControl",
+         "Time": 0.0,
+         "ParameterCurveControlPoints":
+         [
+             { "Time": 0.0, "ParameterValue": 0.0 },
+             { "Time": 0.15, "ParameterValue": 1.0 },
+             { "Time": 0.25, "ParameterValue": 1.0 },
+             { "Time": 0.3, "ParameterValue": 0.3 },
+             { "Time": 0.6, "ParameterValue": 0.0 }
+         ]
+     }
+     */
+    static let parameterCurve = Self(rawValue: CHHapticPattern.Key.parameterCurve.rawValue)
+    
+    /*
+     "ParameterCurveControlPoints":
+     [
+         { "Time": 0.0, "ParameterValue": 0.0 },
+         { "Time": 0.15, "ParameterValue": 1.0 },
+         { "Time": 0.25, "ParameterValue": 1.0 },
+         { "Time": 0.3, "ParameterValue": 0.3 },
+         { "Time": 0.6, "ParameterValue": 0.0 }
+     ]
+     */
+    static let parameterCurveControlPoints = Self(rawValue: CHHapticPattern.Key.parameterCurveControlPoints.rawValue)
+    
+    /*
+     "ParameterID": "HapticIntensityControl",
+     */
+    static let parameterID = Self(rawValue: CHHapticPattern.Key.parameterID.rawValue)
+    
+    /*
+     "ParameterValue": 0.0
+     */
+    static let parameterValue = Self(rawValue: CHHapticPattern.Key.parameterValue.rawValue)
+    
+    /*
+     "Pattern":
+     [
+         {
+             "Event":
+             {
+                 "Time": 0.0,
+                 "EventType": "HapticTransient",
+                 "EventParameters":
+                 [
+                     { "ParameterID": "HapticIntensity", "ParameterValue": 1.0 },
+                     { "ParameterID": "HapticSharpness", "ParameterValue": 0.0 }
+                 ]
+             }
+         },
+         {
+             "Event":
+             {
+                 "Time":0.0,
+                 "EventType":"AudioCustom",
+                 "EventWaveformPath":"CollisionLarge.wav",
+                 "EventParameters":
+                 [
+                     {"ParameterID":"AudioVolume","ParameterValue":1.0}
+                 ]
+             }
+         }
+     ]
+     */
+    static let pattern = Self(rawValue: CHHapticPattern.Key.pattern.rawValue)
+    
+    /*
+     "Time":0.0,
+     */
+    static let time = Self(rawValue: CHHapticPattern.Key.time.rawValue)
+
+    /*
+     "Version": 1.0,
+     */
+    static let version = Self(rawValue: CHHapticPattern.Key.version.rawValue)
+    
+    static var allCases: [Self] {
+        [
+            event,
+            eventDuration,
+            eventParameters,
+            eventType,
+            eventWaveformLoopEnabled,
+            eventWaveformUseVolumeEnvelope,
+            parameter,
+            parameterCurve,
+            parameterCurveControlPoints,
+            parameterID,
+            parameterValue,
+            pattern,
+            time,
+            version,
+        ]
+    }
 }
 
 /*
@@ -221,7 +350,13 @@ extension CHHapticPatternKey {
 
 func zz() {
     let sustainTime = CHHapticEventParameter(parameterID: .sustained, value: 1) // If you want to sustain the haptic for its entire duration.
-    
+//    CHHapticPattern.init(dictionary: <#T##[CHHapticPattern.Key : Any]#>)
+//    CHHapticPattern.init(
+//        dictionary: [
+//            .version: 1.0,
+//            .eventWaveformUseVolumeEnvelope:
+//        ]
+//    )
     
 //    CHHapticPattern.init(dictionary: <#T##[CHHapticPattern.Key : Any]#>)
     //    CHHapticPattern.init(
