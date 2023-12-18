@@ -28,6 +28,7 @@ struct HapticFeedbackDemoApp: App {
                         initialState: HapticEngineFeature.State(),
                         reducer: {
                             HapticEngineFeature(client: .live)
+                                ._printChanges()
                         }
                     )
                 ).navigationTitle("Build your own!")

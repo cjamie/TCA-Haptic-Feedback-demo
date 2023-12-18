@@ -39,3 +39,10 @@ extension Optional {
         return try unwrapOrThrow(UnwrapError.nilValue)
     }
 }
+
+
+func map<A, B>(
+    _ f: @escaping (A) -> B
+) ->([A]) -> [B] {    
+    { $0.map(f) }
+}

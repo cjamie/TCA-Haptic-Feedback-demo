@@ -8,18 +8,18 @@
 import Gen
 import Foundation
 
-let eventType: Gen<HapticEvent.EventType> = Gen
-    .element(of: HapticEvent.EventType.allCases)
-    .map { $0 ?? .audioContinuous }
+let hapticEventType: Gen<HapticEvent.EventType> = Gen
+    .element(of: HapticEvent.EventType.hapticCases)
+    .map { $0! }
 
-let eventParameter = Gen
-    .element(of: HapticEvent.EventParameter.ParameterID.allCasesWithRanges)
+let hapticEventParameterWithRange = Gen
+    .element(of: HapticEvent.EventParameter.ParameterID.hapticCasesWithRanges)
     .map { $0! }
     
 let valueGen: Gen<Float> = .float(in: 0...1)
 let uuidGen = Gen { _ in UUID() }
 
-let eventParam: Gen<HapticEvent.EventParameter> = eventParameter
+let hapticEventParam: Gen<HapticEvent.EventParameter> = hapticEventParameterWithRange
     .flatMap { parameterID, range in
         zip(
             uuidGen,
@@ -30,18 +30,18 @@ let eventParam: Gen<HapticEvent.EventParameter> = eventParameter
     }
     .map(HapticEvent.EventParameter.init(id:parameterID:value:range:))
 
-let arrayOfEventParams: Gen<[HapticEvent.EventParameter]> = eventParam
+let arrayOfEventParams: Gen<[HapticEvent.EventParameter]> = hapticEventParam
     .array(of: .always(5))
-//    .set(ofAtMost: .always(5))
-//    .map(Array.init)
 
 let alwaysZero: Gen<TimeInterval> = .always(0)
 let duration: Gen<TimeInterval> = .double(in: 0.5...10)
 
-let hapticEventGen = zip(
+let vanillaHapticEventGen = zip(
     uuidGen,
-    eventType,
+    hapticEventType,
     arrayOfEventParams,
     alwaysZero,
     duration
 ).map(HapticEvent.init(id:eventType:parameters:relativeTime:duration:))
+
+// TODO: - make a generator of audio... 

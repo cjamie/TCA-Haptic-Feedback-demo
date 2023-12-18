@@ -85,9 +85,18 @@ extension HapticEvent.EventType {
     static let hapticTransient = Self(raw: .hapticTransient)
     
     static var allCases: [Self] {
+        audioCases + hapticCases
+    }
+    
+    static var hapticCases: [Self] {
         [
-//            audioContinuous,
-//            audioCustom,
+            hapticContinuous,
+            hapticTransient,
+        ]
+    }
+    
+    static var audioCases: [Self] {
+        [
             hapticContinuous,
             hapticTransient,
         ]
@@ -114,39 +123,27 @@ extension HapticEvent.EventParameter.ParameterID {
     static let audioPan = Self(raw: .audioPan)
     static let audioPitch = Self(raw: .audioPitch)
     static let audioVolume = Self(raw: .audioVolume)
+
+    static let allCasesWithRanges: [(Self, ClosedRange<Float>)] = hapticCasesWithRanges + audioCasesWithRanges
     
-//    @available(*, deprecated, message: "use allCasesWithRanges instead")
-//    static var allCases: [Self] {
-//        [
-//            hapticIntensity,
-//            hapticSharpness,
-//            attackTime,
-//            decayTime,
-//            releaseTime,
-//            sustained,
-//
-//            // these are audio, not haptic.
-//
-//            //            audioBrightness,
-//            //            audioPan,
-//            //            audioPitch,
-//            //            audioVolume,
-//        ]
-//    }
-//    
-    static let allCasesWithRanges: [(Self, ClosedRange<Float>)] = [
+    static let hapticCasesWithRanges: [(Self, ClosedRange<Float>)] = [
         (hapticIntensity, 0...1),
         (hapticSharpness, 0...1),
         (attackTime, -1...1),
         (decayTime, -1...1),
         (releaseTime, 0...1),
-//        (sustained, 0...1), Weird... apple docs said this should be a bool
-        
+        //        (sustained, 0...1), Weird... apple docs said this should be a bool
+    ]
+    
+    static let audioCasesWithRanges: [(Self, ClosedRange<Float>)] = [
         (audioBrightness, 0...1),
         (audioPan, -1...1),
         (audioPitch, -1...1),
         (audioVolume, 0...1),
     ]
+
+    
+    
 }
 
 let HapticTimeImmediate = CoreHaptics.CHHapticTimeImmediate
@@ -184,27 +181,51 @@ extension HapticDynamicParameter {
     }
 }
 
+
+extension CHHapticPatternKey {
+    static let event = CHHapticPatternKey(rawValue: CHHapticPattern.Key.event.rawValue)
+    static let eventDuration = CHHapticPatternKey(rawValue: CHHapticPattern.Key.eventDuration.rawValue)
+    static let eventParameters = CHHapticPatternKey(rawValue: CHHapticPattern.Key.eventParameters.rawValue)
+    static let eventType = CHHapticPatternKey(rawValue: CHHapticPattern.Key.eventType.rawValue)
+    static let eventWaveformLoopEnabled = CHHapticPatternKey(rawValue: CHHapticPattern.Key.eventWaveformLoopEnabled.rawValue)
+    static let eventWaveformUseVolumeEnvelope = CHHapticPatternKey(rawValue: CHHapticPattern.Key.eventWaveformUseVolumeEnvelope.rawValue)
+    static let parameter = CHHapticPatternKey(rawValue: CHHapticPattern.Key.parameter.rawValue)
+    static let parameterCurve = CHHapticPatternKey(rawValue: CHHapticPattern.Key.parameterCurve.rawValue)
+    static let parameterCurveControlPoints = CHHapticPatternKey(rawValue: CHHapticPattern.Key.parameterCurveControlPoints.rawValue)
+    static let parameterID = CHHapticPatternKey(rawValue: CHHapticPattern.Key.parameterID.rawValue)
+    static let parameterValue = CHHapticPatternKey(rawValue: CHHapticPattern.Key.parameterValue.rawValue)
+    static let pattern = CHHapticPatternKey(rawValue: CHHapticPattern.Key.pattern.rawValue)
+    static let time = CHHapticPatternKey(rawValue: CHHapticPattern.Key.time.rawValue)
+    static let version = CHHapticPatternKey(rawValue: CHHapticPattern.Key.version.rawValue)
+}
+
 /*
  
  let pattern = try CHHapticPattern(
-                 events: [
-                     CHHapticEvent(
-                         eventType: .hapticContinuous,
-                         parameters: [
-                             CHHapticEventParameter(parameterID: .hapticIntensity, value: 1.0),
-                             CHHapticEventParameter(parameterID: .hapticSharpness, value: 1.0)
-                         ],
-                         relativeTime: 0,
-                         duration: 1
-                     )
-                 ],
-                 parameters: []
-             )
+ events: [
+ CHHapticEvent(
+ eventType: .hapticContinuous,
+ parameters: [
+ CHHapticEventParameter(parameterID: .hapticIntensity, value: 1.0),
+ CHHapticEventParameter(parameterID: .hapticSharpness, value: 1.0)
+ ],
+ relativeTime: 0,
+ duration: 1
+ )
+ ],
+ parameters: []
+ )
  
  
  */
 
 func zz() {
     let sustainTime = CHHapticEventParameter(parameterID: .sustained, value: 1) // If you want to sustain the haptic for its entire duration.
-
+    
+    
+//    CHHapticPattern.init(dictionary: <#T##[CHHapticPattern.Key : Any]#>)
+    //    CHHapticPattern.init(
+    //        events: <#T##[CHHapticEvent]#>,
+    //        parameters: <#T##[CHHapticDynamicParameter]#>
+    //    )
 }

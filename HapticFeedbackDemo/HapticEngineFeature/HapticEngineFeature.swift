@@ -8,6 +8,7 @@
 import SwiftUI
 import ComposableArchitecture
 
+// shows a pattern, (with multiple events).
 struct HapticEngineFeature: Reducer {
     struct State: Equatable {
         var engine: HapticEngine?
@@ -20,32 +21,40 @@ struct HapticEngineFeature: Reducer {
             events: [
                 HapticEvent(
                     id: UUID(),
-                    eventType: .hapticContinuous,
+                    eventType: .audioCustom,
                     parameters: [
 //                        .init(id: UUID(), parameterID: .hapticIntensity, value: 1.0, range: 0...1),
 //                        .init(id: UUID(), parameterID: .hapticSharpness, value: 1.0, range: 0...1),
 //                        .init(id: UUID(), parameterID: .attackTime, value: 1.0, range: 0...1)
 //                        .init(id: UUID(), parameterID: .audioBrightness, value: 1.0, range: 0...1),
-//                        .init(id: UUID(), parameterID: .audioPan, value: 1.0, range: 0...1),
-//                        .init(id: UUID(), parameterID: .audioPitch, value: 1.0, range: 0...1),
+                        .init(id: UUID(), parameterID: .audioPan, value: 1.0, range: 0...1),
+                        .init(id: UUID(), parameterID: .audioPitch, value: 1.0, range: 0...1),
                         .init(id: UUID(), parameterID: .audioVolume, value: 1.0, range: 0...1),
-//                        .init(id: UUID(), parameterID: .decayTime, value: 1.0, range: 0...1),
-//                        .init(id: UUID(), parameterID: .releaseTime, value: 1.0, range: 0...1),
-//                        .init(id: UUID(), parameterID: .sustained, value: 1.0, range: 0...1),
+                        .init(id: UUID(), parameterID: .decayTime, value: 1.0, range: 0...1),
+                        .init(id: UUID(), parameterID: .releaseTime, value: 1.0, range: 0...1),
+                        .init(id: UUID(), parameterID: .sustained, value: 1.0, range: 0...1),
 
                     ],
                     relativeTime: 0,
                     duration: 1
                 )
             ],
-//            events: [
-//                
-//            ],
             parameters: []
         )
 
         @BindingState
         var formattedString: String?
+        
+        var hapticEvents: IdentifiedArrayOf<EditHapticEventFeature.State> {
+            get {
+                IdentifiedArrayOf(
+                    uniqueElements: map(EditHapticEventFeature.State.init)(hapticPattern.events)
+                )
+            }
+            set {
+                hapticPattern.events = newValue.elements.map(\.event)
+            }
+        }
     }
     
     enum Action: BindableAction {
@@ -53,6 +62,7 @@ struct HapticEngineFeature: Reducer {
         case onDemoButtonTapped
         case onEngineCreation(HapticEngine)
         case onCreationFailed(Error)
+        case hapticEvent(UUID, EditHapticEventFeature.Action)
         
         case binding(_ action: BindingAction<State>)
     }
@@ -64,8 +74,6 @@ struct HapticEngineFeature: Reducer {
         BindingReducer()
             .onChange(of: \.$hapticPattern) { _, newValue in
                 Reduce { state, _ in
-                    
-                    print("-=- z... ")
                     encoder.outputFormatting = .prettyPrinted
                     state.formattedString = (try? encoder.encode(newValue))
                         .flatMap { String(data: $0, encoding: .utf8) }
@@ -89,6 +97,8 @@ struct HapticEngineFeature: Reducer {
                         await send(.onCreationFailed(error))
                     }
                 }
+            case .hapticEvent:
+                return .none
 
             case .onCreationFailed(let error):
                 state.localizedError = error.localizedDescription
@@ -119,7 +129,13 @@ struct HapticEngineFeature: Reducer {
             case .binding:
                 return .none
             }
-        }
+        }.forEach(
+            \.hapticEvents,
+             action: /HapticEngineFeature.Action.hapticEvent,
+             element: {
+                 EditHapticEventFeature()
+             }
+        )
     }
 }
 
@@ -131,24 +147,15 @@ struct HapticButtonView: View {
         WithViewStore(store, observe: { $0 }) { viewStore in
             ScrollView {
                 VStack {
-                    Text(viewStore.localizedError ?? "Haptic Pattern detail")
+//                    Text(viewStore.localizedError ?? "Haptic Pattern detail")
                         
                     Section("Events") {
                         VStack(alignment: .leading) {
-                            // TODO: - this needs a foreach store
-                            ForEach(viewStore.hapticPattern.events) { event in
-                                HapticEventDetailView(
-                                    store: Store(
-                                        initialState: EditHapticEventFeature.State(
-                                            event: event
-                                        ),
-                                        reducer: {
-                                            EditHapticEventFeature()
-                                                ._printChanges()
-                                        }
-                                    )
-                                )
-                                .padding()
+                            ForEachStore(store.scope(
+                                state: \.hapticEvents,
+                                action: HapticEngineFeature.Action.hapticEvent
+                            )) {
+                                HapticEventDetailView(store: $0).padding()
                             }
                         }
                     }

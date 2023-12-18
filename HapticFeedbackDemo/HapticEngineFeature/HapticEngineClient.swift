@@ -35,7 +35,15 @@ struct HapticPattern: Equatable, Encodable {
     }
 }
 
-// CHHapticEngine
+
+struct CHHapticPatternKey: Hashable {
+    let rawValue: String
+
+    init(rawValue: String) {
+        self.rawValue = rawValue
+    }
+}
+
 struct HapticEngine: Hashable {
     let objId: ObjectIdentifier
     let start: () async throws -> Void
@@ -79,10 +87,10 @@ struct HapticEvent: Hashable, Encodable, Identifiable {
     var relativeTime: TimeInterval
     var duration: TimeInterval
     
-    static let mock = hapticEventGen.run()
+    static let mock = vanillaHapticEventGen.run()
 
     static var dynamicMock: HapticEvent {
-        hapticEventGen.run()
+        vanillaHapticEventGen.run()
     }
     
 //    enum CodingKeys: CodingKey {

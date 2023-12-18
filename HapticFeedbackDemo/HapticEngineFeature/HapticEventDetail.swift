@@ -11,7 +11,12 @@ import ComposableArchitecture
 
 
 struct EditHapticEventFeature: Reducer {
-    struct State: Equatable {
+    struct State: Equatable, Identifiable {
+//        let id = UUID()
+        
+        var id: UUID {
+            event.id
+        }
         @BindingState
         var event: HapticEvent
     }
@@ -42,6 +47,7 @@ struct EditHapticEventFeature: Reducer {
                 state.event = .dynamicMock
                 return .none
             case .onAddParameterButtonTapped:
+                // TODO:  - this should add a parameter dynamic based on the current eventType.
                 var counter = state.event.parameters.map(\.parameterID)
                 
 //                let all = Set(HapticEvent.EventParameter.ParameterID.allCases)
@@ -74,7 +80,6 @@ struct HapticEventDetailView: View {
                         Picker("Select an option", selection: viewStore.$event.eventType) {
                             ForEach(HapticEvent.EventType.allCases, id: \.self) { option in
                                 Text(option.rawValue)
-                                    .padding([.leading, .trailing], 8)
                             }
                         }
                         .pickerStyle(.wheel)
