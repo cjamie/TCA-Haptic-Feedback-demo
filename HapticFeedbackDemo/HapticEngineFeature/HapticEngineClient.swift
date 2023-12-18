@@ -35,7 +35,7 @@ struct HapticPattern: Equatable, Encodable {
     }
 }
 
-
+// CHHapticPattern.Key
 struct CHHapticPatternKey: Hashable {
     let rawValue: String
 
