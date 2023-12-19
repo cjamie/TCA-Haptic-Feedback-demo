@@ -44,4 +44,4 @@ let vanillaHapticEventGen = zip(
     duration
 ).map(HapticEvent.init(id:eventType:parameters:relativeTime:duration:))
 
-// TODO: - make a generator of audio... this needs an entirely different init. 
+// TODO: - make a generator of audio... this needs an entirely different init. (e.g. should eb with parameterKeys)

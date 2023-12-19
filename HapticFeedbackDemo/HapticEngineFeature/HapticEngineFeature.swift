@@ -76,7 +76,7 @@ struct HapticEngineFeature: Reducer {
         BindingReducer()
             .onChange(of: \.$hapticPattern) { _, newValue in
                 Reduce { state, _ in
-                    encoder.outputFormatting = .prettyPrinted
+
                     state.formattedString = (try? encoder.encode(newValue))
                         .flatMap { String(data: $0, encoding: .utf8) }
 
@@ -207,8 +207,7 @@ struct HapticButtonView: View {
                         TextField("Enter text here", text: $0, axis: .vertical)
                             .padding()
                             .background(.green)
-                            .frame(height: 200)
-                        
+                            .frame(height: 200)                        
                     }
                     
                     HStack {
