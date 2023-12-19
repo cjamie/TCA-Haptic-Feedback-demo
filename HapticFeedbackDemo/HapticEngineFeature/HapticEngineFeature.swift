@@ -7,7 +7,6 @@
 
 import SwiftUI
 import ComposableArchitecture
-import Foundation
 
 // shows a pattern, (with multiple events).
 struct HapticEngineFeature: Reducer {
@@ -25,6 +24,7 @@ struct HapticEngineFeature: Reducer {
         @BindingState
         var formattedString: String?
         
+        // TODO: - this should be a view state, which we should scope down to.
         var hapticEvents: IdentifiedArrayOf<EditHapticEventFeature.State> {
             get {
                 .init(uniqueElements: makeFrom(hapticPattern.events))
@@ -39,15 +39,17 @@ struct HapticEngineFeature: Reducer {
         case onAppear
         case onDemoButtonTapped
         case onEngineCreation(HapticEngine)
-        case onCreationFailed(Error)
         case onRandomizeButtonTapped
         
+        case onFailure(Error)
+
         case changeFormatted
         case hapticEvent(UUID, EditHapticEventFeature.Action)
         case binding(_ action: BindingAction<State>)
     }
     
     let client: HapticEngineClient
+    
     let encoder = JSONEncoder().then {
         $0.outputFormatting = .prettyPrinted
     }
@@ -64,16 +66,16 @@ struct HapticEngineFeature: Reducer {
                 return .run { send in
                     do {
                         let engine = try client.makeHapticEngine()
-                        await send(.onEngineCreation(engine))
                         try await engine.start()
+                        await send(.onEngineCreation(engine))
                     } catch {
-                        await send(.onCreationFailed(error))
+                        await send(.onFailure(error))
                     }
                 }.merge(with: .send(.changeFormatted))
             case .hapticEvent:
                 return .none
 
-            case .onCreationFailed(let error):
+            case .onFailure(let error):
                 state.localizedError = error.localizedDescription
                 return .none
                 
@@ -82,6 +84,7 @@ struct HapticEngineFeature: Reducer {
                 return .none
                 
             case .onRandomizeButtonTapped:
+                
                 for indice in state.hapticPattern.events.indices {
                     state.hapticPattern.events[indice]
                         .change(to: vanillaHapticEventGen.run())
@@ -102,20 +105,23 @@ struct HapticEngineFeature: Reducer {
                         .unwrapOrThrow()
                         .makePlayer(state.hapticPattern)
                         .start(HapticTimeImmediate)
-                } catch {
-                    state.localizedError = "Error generating haptic feedback: \(error.localizedDescription)"
-                }
 
-                return .none
+                    return .none
+
+                } catch {
+                    return .send(.onFailure(error))
+                }
             case .binding:
                 return .none
+
             case .changeFormatted:
                 state.formattedString = (try? encoder.encode(state.hapticPattern))
                     .flatMap { String(data: $0, encoding: .utf8) }
 
                 return .none
             }
-        }.forEach(
+        }
+        .forEach(
             \.hapticEvents,
              action: /HapticEngineFeature.Action.hapticEvent,
              element: {
@@ -162,33 +168,29 @@ struct HapticButtonView: View {
                             .padding()
                             .background(.green)
                             .frame(height: 200)
+                            .disabled(true)
                     }
                     
                     HStack {
-                        Button(
-                            action: { viewStore.send(.onDemoButtonTapped) }
-                        ) {
+                        Button(action: {
+                            viewStore.send(.onDemoButtonTapped)
+                        }) {
                             Text("Demo Haptic")
                                 .font(.headline)
                                 .padding()
-                                .foregroundColor(.white)
-                                .background(Color.blue)
                                 .cornerRadius(10)
                         }
 
-                        Button(
-                            action: { viewStore.send(.onRandomizeButtonTapped) }
-                        ) {
+                        Button(action: {
+                            viewStore.send(.onRandomizeButtonTapped)
+                        }) {
                             Text("Randomize")
                                 .font(.headline)
                                 .padding()
-                                .foregroundColor(.white)
-                                .background(Color.blue)
                                 .cornerRadius(10)
                         }
                     }
-                }
-                .onAppear {
+                }.onAppear {
                     viewStore.send(.onAppear)
                 }
             }

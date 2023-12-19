@@ -7,25 +7,23 @@
 
 import CoreHaptics
 
-
-
 extension HapticEngineClient {
     static let live = HapticEngineClient(
         supportsHaptics: {
             CHHapticEngine.capabilitiesForHardware().supportsHaptics
         },
         makeHapticEngine: {
-            let realEngine = try CHHapticEngine()
+            let engine = try CHHapticEngine()
             
             return HapticEngine(
-                objId: ObjectIdentifier(realEngine),
-                start: realEngine.start,
+                objId: ObjectIdentifier(engine),
+                start: engine.start,
                 makePlayer: { pattern in
-                    let player = try realEngine.makePlayer(with: pattern.toCHHapticPattern())
+                    let player = try engine.makePlayer(with: pattern.toCHHapticPattern())
                     
-                    return .init(start: { time in
-                        try player.start(atTime: time)
-                    })
+                    return .init {
+                        try player.start(atTime: $0)
+                    }
                 }
             )
         }

@@ -7,7 +7,6 @@
 
 import Foundation
 
-
 struct HapticEngineClient {
     let supportsHaptics: () -> Bool
     let makeHapticEngine: () throws -> HapticEngine
@@ -63,7 +62,7 @@ struct HapticEngine: Hashable {
  this type of init is not capable of producing audio events.
  */
 // CHHapticEvent
-struct HapticEvent: Hashable, Encodable, Identifiable {
+struct HapticEvent: Hashable, Encodable {
 
     // CHHapticEvent.EventType
     struct EventType: Hashable, Encodable {
@@ -90,11 +89,11 @@ struct HapticEvent: Hashable, Encodable, Identifiable {
     var relativeTime: TimeInterval
     var duration: TimeInterval
 
-    mutating func change(to new: HapticEvent) {
-        eventType = new.eventType
-        parameters = new.parameters
-        relativeTime = new.relativeTime
-        duration = new.duration
+    mutating func change(to: Self) {
+        eventType = to.eventType
+        parameters = to.parameters
+        relativeTime = to.relativeTime
+        duration = to.duration
     }
     
     static let mock = vanillaHapticEventGen.run()
