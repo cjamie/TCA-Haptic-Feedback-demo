@@ -7,6 +7,7 @@
 
 import SwiftUI
 import ComposableArchitecture
+import CoreHaptics
 
 // shows a pattern, (with multiple events).
 struct HapticEngineFeature: Reducer {
@@ -17,28 +18,28 @@ struct HapticEngineFeature: Reducer {
         
         @BindingState
         var hapticPattern = try! HapticPattern(
-//            events: hapticEventGen.array(of: .always(1)).run(),
-            events: [
-                HapticEvent(
-                    id: UUID(),
-                    eventType: .audioCustom,
-                    parameters: [
-//                        .init(id: UUID(), parameterID: .hapticIntensity, value: 1.0, range: 0...1),
-//                        .init(id: UUID(), parameterID: .hapticSharpness, value: 1.0, range: 0...1),
-//                        .init(id: UUID(), parameterID: .attackTime, value: 1.0, range: 0...1)
-//                        .init(id: UUID(), parameterID: .audioBrightness, value: 1.0, range: 0...1),
-                        .init(id: UUID(), parameterID: .audioPan, value: 1.0, range: 0...1),
-                        .init(id: UUID(), parameterID: .audioPitch, value: 1.0, range: 0...1),
-                        .init(id: UUID(), parameterID: .audioVolume, value: 1.0, range: 0...1),
-                        .init(id: UUID(), parameterID: .decayTime, value: 1.0, range: 0...1),
-                        .init(id: UUID(), parameterID: .releaseTime, value: 1.0, range: 0...1),
-                        .init(id: UUID(), parameterID: .sustained, value: 1.0, range: 0...1),
-
-                    ],
-                    relativeTime: 0,
-                    duration: 1
-                )
-            ],
+            events: vanillaHapticEventGen.array(of: .always(1)).run(),
+//            events: [
+//                HapticEvent(
+//                    id: UUID(),
+//                    eventType: .audioCustom,
+//                    parameters: [
+////                        .init(id: UUID(), parameterID: .hapticIntensity, value: 1.0, range: 0...1),
+////                        .init(id: UUID(), parameterID: .hapticSharpness, value: 1.0, range: 0...1),
+////                        .init(id: UUID(), parameterID: .attackTime, value: 1.0, range: 0...1),
+////                        .init(id: UUID(), parameterID: .audioBrightness, value: 1.0, range: 0...1),
+//                        .init(id: UUID(), parameterID: .audioPan, value: 1.0, range: -1...1),
+////                        .init(id: UUID(), parameterID: .audioPitch, value: 1.0, range: -1...1),
+////                        .init(id: UUID(), parameterID: .audioVolume, value: 1.0, range: 0...1),
+////                        .init(id: UUID(), parameterID: .decayTime, value: 1.0, range: 0...1),
+////                        .init(id: UUID(), parameterID: .releaseTime, value: 1.0, range: 0...1),
+////                        .init(id: UUID(), parameterID: .sustained, value: 1.0, range: 0...1),
+//
+//                    ],
+//                    relativeTime: 0,
+//                    duration: 1
+//                )
+//            ],
             parameters: []
         )
 
@@ -63,6 +64,7 @@ struct HapticEngineFeature: Reducer {
         case onEngineCreation(HapticEngine)
         case onCreationFailed(Error)
         case hapticEvent(UUID, EditHapticEventFeature.Action)
+        case onRandomizeButtonTapped
         
         case binding(_ action: BindingAction<State>)
     }
@@ -87,7 +89,41 @@ struct HapticEngineFeature: Reducer {
                 encoder.outputFormatting = .prettyPrinted
                 state.formattedString = (try? encoder.encode(state.hapticPattern))
                     .flatMap { String(data: $0, encoding: .utf8) }
-
+               
+//                let capabilities = CHHapticEngine.capabilitiesForHardware()
+//
+//                let rawCases = HapticEvent
+//                    .EventParameter
+//                    .ParameterID
+//                    .allCasesWithRanges
+//                    .map(\.0.toRaw)
+//
+//                let (success, failures): (
+//                    [(String, String)],
+//                    [(String, String)]
+//                ) = HapticEvent
+//                    .EventType
+//                    .allCases
+//                    .map(\.toRaw).reduce(into: ([], [])) { acc, eventType in
+//                        rawCases.forEach { paramId in
+//                            do {
+//                                _ = try capabilities.attributes(
+//                                    forEventParameter: paramId,
+//                                    eventType: eventType
+//                                )
+//                                acc.0.append((
+//                                    paramId.rawValue,
+//                                    eventType.rawValue
+//                                ))
+//                            } catch {
+//                                acc.1.append((
+//                                    paramId.rawValue,
+//                                    eventType.rawValue
+//                                ))
+//                            }
+//                        }
+//                    }
+                
                 return .run { send in
                     do {
                         let engine = try client.makeHapticEngine()
@@ -106,6 +142,12 @@ struct HapticEngineFeature: Reducer {
                 
             case .onEngineCreation(let engine):
                 state.engine = engine
+                return .none
+                
+            case .onRandomizeButtonTapped:
+                state.hapticPattern.events = vanillaHapticEventGen
+                    .array(of: .always(1))
+                    .run()
                 return .none
 
             case .onDemoButtonTapped:
@@ -147,7 +189,7 @@ struct HapticButtonView: View {
         WithViewStore(store, observe: { $0 }) { viewStore in
             ScrollView {
                 VStack {
-//                    Text(viewStore.localizedError ?? "Haptic Pattern detail")
+                    Text(viewStore.localizedError ?? "Haptic Pattern detail")
                         
                     Section("Events") {
                         VStack(alignment: .leading) {
@@ -168,20 +210,33 @@ struct HapticButtonView: View {
                             .frame(height: 200)
                         
                     }
+                    
+                    HStack {
+                        Button(
+                            action: { viewStore.send(.onDemoButtonTapped) }
+                        ) {
+                            Text("Demo Haptic")
+                                .font(.headline)
+                                .padding()
+                                .foregroundColor(.white)
+                                .background(Color.blue)
+                                .cornerRadius(10)
+                        }
 
-                    Button(
-                        action: { viewStore.send(.onDemoButtonTapped) }
-                    ) {
-                        Text("Tap Me!")
-                            .font(.headline)
-                            .padding()
-                            .foregroundColor(.white)
-                            .background(Color.blue)
-                            .cornerRadius(10)
+                        Button(
+                            action: { viewStore.send(.onRandomizeButtonTapped) }
+                        ) {
+                            Text("Randomize")
+                                .font(.headline)
+                                .padding()
+                                .foregroundColor(.white)
+                                .background(Color.blue)
+                                .cornerRadius(10)
+                        }
                     }
-                    .onAppear {
-                        viewStore.send(.onAppear)
-                    }
+                }
+                .onAppear {
+                    viewStore.send(.onAppear)
                 }
             }
         }
@@ -198,5 +253,3 @@ struct HapticButtonView: View {
         )
     )
 }
-
-

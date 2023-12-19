@@ -58,6 +58,9 @@ struct HapticEngine: Hashable {
     }
 }
 
+/*
+ this type of init is not capable of producing audio events.
+ */
 // CHHapticEvent
 struct HapticEvent: Hashable, Encodable, Identifiable {
 
@@ -79,7 +82,6 @@ struct HapticEvent: Hashable, Encodable, Identifiable {
         var value: Float
         let range: ClosedRange<Float>
     }
-
     
     let id: UUID
     var eventType: EventType
@@ -92,13 +94,6 @@ struct HapticEvent: Hashable, Encodable, Identifiable {
     static var dynamicMock: HapticEvent {
         vanillaHapticEventGen.run()
     }
-    
-//    enum CodingKeys: CodingKey {
-//        case eventType
-//        case parameters
-//        case relativeTime
-//        case duration
-//    }
 }
 
 // CHHapticDynamicParameter

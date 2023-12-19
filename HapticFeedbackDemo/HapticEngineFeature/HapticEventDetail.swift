@@ -8,17 +8,15 @@
 import SwiftUI
 import ComposableArchitecture
 
-
-
+// TODO: - this is specifically for haptics.. will create another for audio.
 struct EditHapticEventFeature: Reducer {
     struct State: Equatable, Identifiable {
-//        let id = UUID()
-        
+        @BindingState
+        var event: HapticEvent
+
         var id: UUID {
             event.id
         }
-        @BindingState
-        var event: HapticEvent
     }
     
     enum Action: BindableAction {
@@ -26,7 +24,7 @@ struct EditHapticEventFeature: Reducer {
         case binding(_ action: BindingAction<State>)
         case onDeleteParameters(IndexSet)
         case onRandomizeButtonTapped
-        case onAddParameterButtonTapped
+        case onAddEventParameterButtonTapped
     }
     
     var body: some ReducerOf<Self> {
@@ -46,22 +44,9 @@ struct EditHapticEventFeature: Reducer {
             case .onRandomizeButtonTapped:
                 state.event = .dynamicMock
                 return .none
-            case .onAddParameterButtonTapped:
-                // TODO:  - this should add a parameter dynamic based on the current eventType.
-                var counter = state.event.parameters.map(\.parameterID)
-                
-//                let all = Set(HapticEvent.EventParameter.ParameterID.allCases)
-//                
-//                let eligible = all.subtracting(counter)
-//                
-//                let makeNewParameterWithId: (HapticEvent.EventParameter.ParameterID) -> HapticEvent.EventParameter = { _ in fatalError() }
-                
-//                if let unUsedParameterId = eligible.randomElement() {
-//                    state.event.parameters.append(makeNewParameterWithId(unUsedParameterId))
-//                } else {
-//                    state.
-//                }
-                
+            case .onAddEventParameterButtonTapped:
+                state.event.parameters
+                    .append(hapticEventParam.run())
                 
                 return .none
             }
@@ -103,38 +88,37 @@ struct HapticEventDetailView: View {
                             }
                         }.frame(height: 300)
                     } header: {
-                        
                         HStack {
                             Text("parameters([CHHapticEventParameter]):")
                                 .font(.system(size: 16, weight: .bold))
                             
                             Button(action: {
-                                viewStore.send(.onAddParameterButtonTapped)
+                                viewStore.send(.onAddEventParameterButtonTapped)
                             }, label: {
                                 Text("add")
                             })
                         }
                     }
                     
-//                    Section {
-//                        Slider(value: viewStore.$event.relativeTime, in: 0...10)
-//                    } header: {
-//                        Text("relativeTime(TimeInterval): \(viewStore.event.relativeTime.formatted())")
-//                            .font(.system(size: 16, weight: .bold))
-//                    }
-//                    
-//                    Section {
-//                        Slider(value: viewStore.$event.duration, in: 0...10)
-//                    } header: {
-//                        Text("duration(TimeInterval):\(viewStore.event.duration.formatted())")
-//                            .font(.system(size: 16, weight: .bold))
-//                    }
-//                                        
-//                    Button(action: {
-//                        viewStore.send(.onRandomizeButtonTapped)
-//                    }) {
-//                        Text("Randomize")
-//                    }
+                    Section {
+                        Slider(value: viewStore.$event.relativeTime, in: 0...10)
+                    } header: {
+                        Text("relativeTime(TimeInterval): \(viewStore.event.relativeTime.formatted())")
+                            .font(.system(size: 16, weight: .bold))
+                    }
+                    
+                    Section {
+                        Slider(value: viewStore.$event.duration, in: 0...10)
+                    } header: {
+                        Text("duration(TimeInterval):\(viewStore.event.duration.formatted())")
+                            .font(.system(size: 16, weight: .bold))
+                    }
+                                        
+                    Button(action: {
+                        viewStore.send(.onRandomizeButtonTapped)
+                    }) {
+                        Text("Randomize")
+                    }
                 }
                 .onAppear {
                     viewStore.send(.onAppear)
@@ -153,7 +137,6 @@ struct HapticEventDetailView: View {
                 ),
                 reducer: {
                     EditHapticEventFeature()
-                        ._printChanges()
                 }
             )
         )
