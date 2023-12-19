@@ -22,7 +22,7 @@ struct HapticEngineFeature: Reducer {
         )
 
         @BindingState
-        var formattedString: String?
+        var prettyJSONFormattedDescription: String?
         
         // TODO: - this should be a view state, which we should scope down to.
         var hapticEvents: IdentifiedArrayOf<EditHapticEventFeature.State> {
@@ -33,6 +33,17 @@ struct HapticEngineFeature: Reducer {
                 hapticPattern.events = newValue.elements.map(\.event)
             }
         }
+        
+        var identifiedFormattedString: Identified<UUID, String>? {
+            get {
+                prettyJSONFormattedDescription.map {
+                    Identified($0, id: uuidGen.run())
+                } ?? nil
+            }
+            set {
+                
+            }
+        }
     }
     
     enum Action: BindableAction {
@@ -40,12 +51,14 @@ struct HapticEngineFeature: Reducer {
         case onDemoButtonTapped
         case onEngineCreation(HapticEngine)
         case onRandomizeButtonTapped
+        case onDisplayButtonTapped
         
         case onFailure(Error)
 
-        case changeFormatted
         case hapticEvent(UUID, EditHapticEventFeature.Action)
         case binding(_ action: BindingAction<State>)
+        
+        case formattedDisplayDismissed
     }
     
     let client: HapticEngineClient
@@ -54,10 +67,6 @@ struct HapticEngineFeature: Reducer {
         $0.outputFormatting = .prettyPrinted
     }
     
-    private enum CancelID {
-        case throttleFormatted
-    }
-
     var body: some ReducerOf<Self> {
         BindingReducer()
         Reduce { state, action in
@@ -71,7 +80,8 @@ struct HapticEngineFeature: Reducer {
                     } catch {
                         await send(.onFailure(error))
                     }
-                }.merge(with: .send(.changeFormatted))
+                }
+                //.merge(with: .send(.changeFormatted))
             case .hapticEvent:
                 return .none
 
@@ -114,10 +124,13 @@ struct HapticEngineFeature: Reducer {
             case .binding:
                 return .none
 
-            case .changeFormatted:
-                state.formattedString = (try? encoder.encode(state.hapticPattern))
+            case .onDisplayButtonTapped:
+                state.prettyJSONFormattedDescription = (try? encoder.encode(state.hapticPattern))
                     .flatMap { String(data: $0, encoding: .utf8) }
 
+                return .none
+            case .formattedDisplayDismissed:
+                state.prettyJSONFormattedDescription = nil
                 return .none
             }
         }
@@ -128,16 +141,16 @@ struct HapticEngineFeature: Reducer {
                  EditHapticEventFeature()
              }
         )
-        .onChange(of: \.hapticPattern) { _, newValue in
-            Reduce { state, _ in
-                .send(.changeFormatted).throttle(
-                    id: CancelID.throttleFormatted,
-                    for: .seconds(1),
-                    scheduler: DispatchQueue.main,
-                    latest: true
-                )
-            }
-        }
+//        .onChange(of: \.hapticPattern) { _, newValue in
+//            Reduce { state, _ in
+//                .send(.changeFormatted).throttle(
+//                    id: CancelID.throttleFormatted,
+//                    for: .seconds(1),
+//                    scheduler: DispatchQueue.main,
+//                    latest: true
+//                )
+//            }
+//        }
     }
 }
 
@@ -162,14 +175,24 @@ struct HapticButtonView: View {
                         }
                     }
                     
-                    // TODO: - handle focus state changes (because of keyboard)
-                    viewStore.$formattedString.unwrap().map {
-                        TextField("Enter text here", text: $0, axis: .vertical)
+//                    // TODO: - handle focus state changes (because of keyboard)
+//                    viewStore.$formattedString.unwrap().map {
+//                        TextField("Enter text here", text: $0, axis: .vertical)
+//                            .padding()
+//                            .background(.green)
+//                            .frame(height: 200)
+//                            .disabled(true)
+//                    }
+                    
+                    Button(action: {
+                        viewStore.send(.onDisplayButtonTapped)
+                    }) {
+                        Text("Show pretty JSON")
+                            .font(.headline)
                             .padding()
-                            .background(.green)
-                            .frame(height: 200)
-                            .disabled(true)
+                            .cornerRadius(10)
                     }
+                    
                     
                     HStack {
                         Button(action: {
@@ -194,6 +217,18 @@ struct HapticButtonView: View {
                     viewStore.send(.onAppear)
                 }
             }
+            .sheet(isPresented: viewStore.binding(
+                get: { $0.prettyJSONFormattedDescription != nil },
+                send: { _ in HapticEngineFeature.Action.formattedDisplayDismissed }
+            ), content: {                
+                ScrollView {
+                    if let jsonText = viewStore.prettyJSONFormattedDescription {
+                        Text(jsonText)
+                            .background(.green)
+                    }
+                }.padding(.zero)
+            })
+            
         }
     }
 }
@@ -210,3 +245,7 @@ struct HapticButtonView: View {
 }
 
 private let makeFrom = map(EditHapticEventFeature.State.init)
+
+func asas() {
+//    Identified(<#T##value: Value##Value#>, id: <#T##Hashable#>)
+}
