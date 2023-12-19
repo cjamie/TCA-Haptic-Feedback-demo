@@ -42,8 +42,9 @@ struct EditHapticEventFeature: Reducer {
                 return .none
 
             case .onRandomizeButtonTapped:
-                state.event = .dynamicMock
+                state.event.change(to: vanillaHapticEventGen.run())
                 return .none
+
             case .onAddEventParameterButtonTapped:
                 state.event.parameters
                     .append(hapticEventParam.run())
@@ -58,16 +59,16 @@ struct HapticEventDetailView: View {
     let store: StoreOf<EditHapticEventFeature>
 
     var body: some View {
-        WithViewStore(store, observe: {$0}) { viewStore in
+        WithViewStore(store, observe: { $0 }) { viewStore in
             ScrollView {
                 VStack(alignment: .leading, spacing: 10) {
                     Section {
                         Picker("Select an option", selection: viewStore.$event.eventType) {
-                            ForEach(HapticEvent.EventType.allCases, id: \.self) { option in
+                            ForEach(HapticEvent.EventType.hapticCases, id: \.self) { option in
                                 Text(option.rawValue)
                             }
                         }
-                        .pickerStyle(.wheel)
+                        .pickerStyle(.segmented)
                     } header: {
                         Text("eventType(CHHapticEvent): \(viewStore.event.eventType.rawValue)")
                             .font(.system(size: 16, weight: .bold))

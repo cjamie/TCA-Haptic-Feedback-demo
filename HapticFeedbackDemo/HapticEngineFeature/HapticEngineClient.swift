@@ -44,6 +44,7 @@ struct CHHapticPatternKey: Hashable {
     }
 }
 
+// CHHapticEngine
 struct HapticEngine: Hashable {
     let objId: ObjectIdentifier
     let start: () async throws -> Void
@@ -77,7 +78,7 @@ struct HapticEvent: Hashable, Encodable, Identifiable {
             let rawValue: String
         }
         
-        let id: UUID        
+        let id: UUID
         let parameterID: ParameterID
         var value: Float
         let range: ClosedRange<Float>
@@ -88,12 +89,38 @@ struct HapticEvent: Hashable, Encodable, Identifiable {
     var parameters: [EventParameter]
     var relativeTime: TimeInterval
     var duration: TimeInterval
+
+    mutating func change(to new: HapticEvent) {
+        eventType = new.eventType
+        parameters = new.parameters
+        relativeTime = new.relativeTime
+        duration = new.duration
+    }
     
     static let mock = vanillaHapticEventGen.run()
 
     static var dynamicMock: HapticEvent {
         vanillaHapticEventGen.run()
     }
+    
+    static let `default` = HapticEvent(
+        id: uuidGen.run(),
+        eventType: .audioCustom,
+        parameters: [
+            //                        .init(id: UUID(), parameterID: .hapticIntensity, value: 1.0, range: 0...1),
+            //                        .init(id: UUID(), parameterID: .hapticSharpness, value: 1.0, range: 0...1),
+            //                        .init(id: UUID(), parameterID: .attackTime, value: 1.0, range: 0...1),
+            //                        .init(id: UUID(), parameterID: .audioBrightness, value: 1.0, range: 0...1),
+            .init(id: uuidGen.run(), parameterID: .audioPan, value: 1.0, range: -1...1),
+            //                        .init(id: UUID(), parameterID: .audioPitch, value: 1.0, range: -1...1),
+            //                        .init(id: UUID(), parameterID: .audioVolume, value: 1.0, range: 0...1),
+            //                        .init(id: UUID(), parameterID: .decayTime, value: 1.0, range: 0...1),
+            //                        .init(id: UUID(), parameterID: .releaseTime, value: 1.0, range: 0...1),
+            //                        .init(id: UUID(), parameterID: .sustained, value: 1.0, range: 0...1),
+        ],
+        relativeTime: 0,
+        duration: 1
+    )
 }
 
 // CHHapticDynamicParameter
