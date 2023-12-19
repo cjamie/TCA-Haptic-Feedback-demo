@@ -124,7 +124,8 @@ struct HapticEventDetailView: View {
                 .onAppear {
                     viewStore.send(.onAppear)
                 }
-            }.navigationTitle("Edit Haptic Event")
+            }
+            //.navigationTitle("Edit Haptic Event")
         }
     }
 }

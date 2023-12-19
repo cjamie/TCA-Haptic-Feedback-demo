@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		5F0CE2032B3240FF00C70CFC /* CopyClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F0CE2022B3240FF00C70CFC /* CopyClient.swift */; };
 		5F3882D72B294E9500C807B8 /* MyFeedbackGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F3882D62B294E9500C807B8 /* MyFeedbackGenerator.swift */; };
 		5F3882D92B2957B100C807B8 /* HapticsClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F3882D82B2957B100C807B8 /* HapticsClient.swift */; };
 		5F3882DB2B2957CE00C807B8 /* HapticsClient+Live.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F3882DA2B2957CE00C807B8 /* HapticsClient+Live.swift */; };
@@ -27,6 +28,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		5F0CE2022B3240FF00C70CFC /* CopyClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CopyClient.swift; sourceTree = "<group>"; };
 		5F3882D62B294E9500C807B8 /* MyFeedbackGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MyFeedbackGenerator.swift; sourceTree = "<group>"; };
 		5F3882D82B2957B100C807B8 /* HapticsClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HapticsClient.swift; sourceTree = "<group>"; };
 		5F3882DA2B2957CE00C807B8 /* HapticsClient+Live.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "HapticsClient+Live.swift"; sourceTree = "<group>"; };
@@ -86,6 +88,7 @@
 				5F9A5ACD2B298CE7007587A7 /* HapticEngineClient.swift */,
 				5F9A5ACF2B2A5AE9007587A7 /* HapticEngineClient+Live.swift */,
 				5F9A5AD12B2A65A5007587A7 /* HapticEventDetail.swift */,
+				5F0CE2022B3240FF00C70CFC /* CopyClient.swift */,
 			);
 			path = HapticEngineFeature;
 			sourceTree = "<group>";
@@ -217,6 +220,7 @@
 				5FC29A732B293B9600E08C3C /* Utilities.swift in Sources */,
 				5FE18E622B290734009BD46C /* HapticsFeature.swift in Sources */,
 				5F3882DE2B29587600C807B8 /* HapticType.swift in Sources */,
+				5F0CE2032B3240FF00C70CFC /* CopyClient.swift in Sources */,
 				5F3882D72B294E9500C807B8 /* MyFeedbackGenerator.swift in Sources */,
 				5F3882D92B2957B100C807B8 /* HapticsClient.swift in Sources */,
 				5F9A5AD02B2A5AE9007587A7 /* HapticEngineClient+Live.swift in Sources */,

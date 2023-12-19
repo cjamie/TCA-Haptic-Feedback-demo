@@ -13,7 +13,8 @@ struct HapticEngineFeature: Reducer {
     struct State: Equatable {
         var engine: HapticEngine?
         var localizedError: String?
-        
+        var copyImage: String = "square.on.square"
+        var copyColor: Color = .blue
         @BindingState
         var hapticPattern = try! HapticPattern(
             events: vanillaHapticEventGen
@@ -33,17 +34,6 @@ struct HapticEngineFeature: Reducer {
                 hapticPattern.events = newValue.elements.map(\.event)
             }
         }
-        
-        var identifiedFormattedString: Identified<UUID, String>? {
-            get {
-                prettyJSONFormattedDescription.map {
-                    Identified($0, id: uuidGen.run())
-                } ?? nil
-            }
-            set {
-                
-            }
-        }
     }
     
     enum Action: BindableAction {
@@ -52,6 +42,9 @@ struct HapticEngineFeature: Reducer {
         case onEngineCreation(HapticEngine)
         case onRandomizeButtonTapped
         case onDisplayButtonTapped
+        case cancelPrettyJSONButtonTapped
+        case onCopyPrettyJSONTapped
+        case resetCopyImage
         
         case onFailure(Error)
 
@@ -62,11 +55,13 @@ struct HapticEngineFeature: Reducer {
     }
     
     let client: HapticEngineClient
+    let copyClient: CopyClient
     
     let encoder = JSONEncoder().then {
         $0.outputFormatting = .prettyPrinted
     }
-    
+
+    @Dependency(\.continuousClock) var clock
     var body: some ReducerOf<Self> {
         BindingReducer()
         Reduce { state, action in
@@ -81,7 +76,7 @@ struct HapticEngineFeature: Reducer {
                         await send(.onFailure(error))
                     }
                 }
-                //.merge(with: .send(.changeFormatted))
+                .merge(with: .send(.onDisplayButtonTapped))
             case .hapticEvent:
                 return .none
 
@@ -100,6 +95,22 @@ struct HapticEngineFeature: Reducer {
                         .change(to: vanillaHapticEventGen.run())
                 }
 
+                return .none
+            case .cancelPrettyJSONButtonTapped:
+                state.prettyJSONFormattedDescription = nil
+                return .none
+            case .onCopyPrettyJSONTapped:
+                state.copyImage = "checkmark.circle.fill"
+                state.prettyJSONFormattedDescription.map(copyClient.copy)
+                state.copyColor = .green
+
+                return .run { send in
+                    try await clock.sleep(for: .seconds(1))
+                    await send(.resetCopyImage, animation: .bouncy)
+                }
+            case .resetCopyImage:
+                state.copyImage = "square.on.square"
+                state.copyColor = .blue
                 return .none
 
             case .onDemoButtonTapped:
@@ -125,9 +136,16 @@ struct HapticEngineFeature: Reducer {
                 return .none
 
             case .onDisplayButtonTapped:
-                state.prettyJSONFormattedDescription = (try? encoder.encode(state.hapticPattern))
-                    .flatMap { String(data: $0, encoding: .utf8) }
-
+                
+                do {
+                    state.prettyJSONFormattedDescription = String(
+                        data: try encoder.encode(state.hapticPattern),
+                        encoding: .utf8
+                    )
+                } catch {
+                    state.localizedError = error.localizedDescription
+                }
+                
                 return .none
             case .formattedDisplayDismissed:
                 state.prettyJSONFormattedDescription = nil
@@ -141,16 +159,6 @@ struct HapticEngineFeature: Reducer {
                  EditHapticEventFeature()
              }
         )
-//        .onChange(of: \.hapticPattern) { _, newValue in
-//            Reduce { state, _ in
-//                .send(.changeFormatted).throttle(
-//                    id: CancelID.throttleFormatted,
-//                    for: .seconds(1),
-//                    scheduler: DispatchQueue.main,
-//                    latest: true
-//                )
-//            }
-//        }
     }
 }
 
@@ -174,16 +182,7 @@ struct HapticButtonView: View {
                             }
                         }
                     }
-                    
-//                    // TODO: - handle focus state changes (because of keyboard)
-//                    viewStore.$formattedString.unwrap().map {
-//                        TextField("Enter text here", text: $0, axis: .vertical)
-//                            .padding()
-//                            .background(.green)
-//                            .frame(height: 200)
-//                            .disabled(true)
-//                    }
-                    
+                                        
                     Button(action: {
                         viewStore.send(.onDisplayButtonTapped)
                     }) {
@@ -192,8 +191,7 @@ struct HapticButtonView: View {
                             .padding()
                             .cornerRadius(10)
                     }
-                    
-                    
+                                        
                     HStack {
                         Button(action: {
                             viewStore.send(.onDemoButtonTapped)
@@ -217,18 +215,39 @@ struct HapticButtonView: View {
                     viewStore.send(.onAppear)
                 }
             }
-            .sheet(isPresented: viewStore.binding(
-                get: { $0.prettyJSONFormattedDescription != nil },
-                send: { _ in HapticEngineFeature.Action.formattedDisplayDismissed }
-            ), content: {                
-                ScrollView {
-                    if let jsonText = viewStore.prettyJSONFormattedDescription {
-                        Text(jsonText)
-                            .background(.green)
+            .sheet(
+                isPresented: viewStore.binding(
+                    get: { $0.prettyJSONFormattedDescription != nil },
+                    send: { _ in HapticEngineFeature.Action.formattedDisplayDismissed }
+                ),
+                content: {
+                    NavigationView {
+                        ScrollView {
+                            viewStore.prettyJSONFormattedDescription.map {
+                                Text($0)
+                                    .padding()
+                            }
+                        }.toolbar {
+                            ToolbarItem(placement: .cancellationAction) {
+                                Button("Cancel") {
+                                    viewStore.send(.cancelPrettyJSONButtonTapped)
+                                }
+                            }
+                            
+                            ToolbarItem(placement: .topBarTrailing) {
+                                Button(action: {
+                                    viewStore.send(.onCopyPrettyJSONTapped)
+                                }) {
+                                    Image(systemName: viewStore.copyImage)
+                                        .resizable()
+                                        .aspectRatio(contentMode: .fit)
+                                        .foregroundColor(viewStore.copyColor)
+                                }
+                            }
+                        }
                     }
-                }.padding(.zero)
-            })
-            
+                }
+            )
         }
     }
 }
@@ -238,14 +257,11 @@ struct HapticButtonView: View {
         store: Store(
             initialState: HapticEngineFeature.State(),
             reducer: {
-                HapticEngineFeature(client: .mock)
+                HapticEngineFeature(client: .mock, copyClient: .mock)
+                    ._printChanges()
             }
         )
     )
 }
 
 private let makeFrom = map(EditHapticEventFeature.State.init)
-
-func asas() {
-//    Identified(<#T##value: Value##Value#>, id: <#T##Hashable#>)
-}
