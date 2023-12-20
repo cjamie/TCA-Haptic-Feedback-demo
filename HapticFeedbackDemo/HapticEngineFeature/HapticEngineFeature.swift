@@ -51,7 +51,7 @@ struct HapticEngineFeature: Reducer {
         case hapticEvent(UUID, EditHapticEventFeature.Action)
         case binding(_ action: BindingAction<State>)
         
-        case formattedDisplayDismissed
+        case onFormattedDisplayDismissed
     }
     
     let client: HapticEngineClient
@@ -69,7 +69,10 @@ struct HapticEngineFeature: Reducer {
             case .onAppear:
                 return .run { send in
                     do {
-                        let engine = try client.makeHapticEngine()
+                        let engine = try client.makeHapticEngine(
+                            resetHandler: {},
+                            stoppedHandler: { _ in }
+                        )
                         try await engine.start()
                         await send(.onEngineCreation(engine))
                     } catch {
@@ -147,7 +150,7 @@ struct HapticEngineFeature: Reducer {
                 }
                 
                 return .none
-            case .formattedDisplayDismissed:
+            case .onFormattedDisplayDismissed:
                 state.prettyJSONFormattedDescription = nil
                 return .none
             }
@@ -218,7 +221,7 @@ struct HapticButtonView: View {
             .sheet(
                 isPresented: viewStore.binding(
                     get: { $0.prettyJSONFormattedDescription != nil },
-                    send: { _ in HapticEngineFeature.Action.formattedDisplayDismissed }
+                    send: { _ in HapticEngineFeature.Action.onFormattedDisplayDismissed }
                 ),
                 content: {
                     NavigationView {

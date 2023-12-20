@@ -11,7 +11,7 @@ import ComposableArchitecture
 struct HapticsFeature: Reducer {
     struct State: Equatable {
         @BindingState
-        var selectedHapticType = HapticType
+        var selectedHapticType = BasicHaptic
             .allCases
             .randomElement() ?? .light
         
@@ -31,7 +31,7 @@ struct HapticsFeature: Reducer {
     //    @CasePathable
     enum Action: BindableAction {
         case binding(_ action: BindingAction<State>)
-        case onHapticTapped(HapticType)
+        case onHapticTapped(BasicHaptic)
         case onAppear
         case onPrepareButtonTapped
         case onRetriggerButtonTapped
@@ -128,7 +128,7 @@ struct HapticMenuApp: View {
                     }
                     
                     VStack {
-                        ForEach(HapticType.allCases, id: \.self) { hapticType in
+                        ForEach(BasicHaptic.allCases, id: \.self) { hapticType in
                             Button(action: {
                                 viewStore.send(.onHapticTapped(hapticType))
                             }) {

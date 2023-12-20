@@ -8,14 +8,64 @@
 import CoreHaptics
 
 extension HapticEngineClient {
-    static let live = HapticEngineClient(
+    static let liveHaptic = HapticEngineClient(
         supportsHaptics: {
             CHHapticEngine.capabilitiesForHardware().supportsHaptics
         },
-        makeHapticEngine: {
+        _makeHapticEngine: { resetHandler, stoppedHandler in
             let engine = try CHHapticEngine()
             
-            return HapticEngine(
+            let hapticEngine = HapticEngine(
+                objId: ObjectIdentifier(engine),
+                start: engine.start,
+                makePlayer: { pattern in
+                    let player = try engine.makePlayer(with: pattern.toCHHapticPattern())
+                    
+                    return .init { try player.start(atTime: $0) }
+                }
+            )
+            
+            engine.resetHandler = resetHandler
+            engine.stoppedHandler = { reason in
+                let base: String
+                                
+                switch reason {
+                case .audioSessionInterrupt:
+                    base = "audioSessionInterrupt"
+                case .applicationSuspended:
+                    base = "applicationSuspended"
+                case .idleTimeout:
+                    base = "idleTimeout"
+                case .notifyWhenFinished:
+                    base = "notifyWhenFinished"
+                case .systemError:
+                    base = "systemError"
+                case .engineDestroyed:
+                    base = "engineDestroyed"
+                case .gameControllerDisconnect:
+                    base = "gameControllerDisconnect"
+                @unknown default:
+                    base = "@unknown default\(reason)"
+                }
+                
+                stoppedHandler(
+                    "engine.stoppedHandler: CHHapticEngine.StoppedReason." + base + "\n\treasonCode: \(reason.rawValue)"
+                )
+            }
+            
+            return hapticEngine
+        }
+    )
+    
+    // TODO: - is this necessary, or is the liveHaptic version able to also output audio bydefault?
+    static let liveAudio = HapticEngineClient(
+        supportsHaptics: {
+            CHHapticEngine.capabilitiesForHardware().supportsAudio
+        },
+        _makeHapticEngine: { resetHandler, stoppedHandler in
+            let engine = try CHHapticEngine(audioSession: .sharedInstance())
+            
+            let hapticEngine = HapticEngine(
                 objId: ObjectIdentifier(engine),
                 start: engine.start,
                 makePlayer: { pattern in
@@ -26,6 +76,36 @@ extension HapticEngineClient {
                     }
                 }
             )
+            
+            engine.resetHandler = resetHandler
+            engine.stoppedHandler = { reason in
+                let base: String
+                                
+                switch reason {
+                case .audioSessionInterrupt:
+                    base = "audioSessionInterrupt"
+                case .applicationSuspended:
+                    base = "applicationSuspended"
+                case .idleTimeout:
+                    base = "idleTimeout"
+                case .notifyWhenFinished:
+                    base = "notifyWhenFinished"
+                case .systemError:
+                    base = "systemError"
+                case .engineDestroyed:
+                    base = "engineDestroyed"
+                case .gameControllerDisconnect:
+                    base = "gameControllerDisconnect"
+                @unknown default:
+                    base = "@unknown default\(reason)"
+                }
+                
+                stoppedHandler(
+                    "engine.stoppedHandler: CHHapticEngine.StoppedReason." + base + "\n\treasonCode: \(reason.rawValue)"
+                )
+            }
+            
+            return hapticEngine
         }
     )
 }
@@ -44,8 +124,8 @@ extension HapticEvent {
         CHHapticEvent(
             eventType: CHHapticEvent.EventType(rawValue: eventType.rawValue),
             parameters: parameters.map(\.toCHHapticEventParameter),
-            relativeTime: 0,
-            duration: 1
+            relativeTime: relativeTime,
+            duration: duration
         )
     }
 }
@@ -310,68 +390,4 @@ extension CHHapticPatternKey {
             version,
         ]
     }
-}
-
-/*
- 
- let pattern = try CHHapticPattern(
- events: [
- CHHapticEvent(
- eventType: .hapticContinuous,
- parameters: [
- CHHapticEventParameter(parameterID: .hapticIntensity, value: 1.0),
- CHHapticEventParameter(parameterID: .hapticSharpness, value: 1.0)
- ],
- relativeTime: 0,
- duration: 1
- )
- ],
- parameters: []
- )
- 
- 
- */
-
-func zz() {
-//id:eventType:parameters:relativeTime:duration
-    
-//    CHHapticEvent.init(eventType: <#T##CHHapticEvent.EventType#>, parameters: <#T##[CHHapticEventParameter]#>, relativeTime: <#T##TimeInterval#>, duration: <#T##TimeInterval#>)
-    
-    
-    
-//    CHHapticPattern.init(
-//        events: [
-//            CHHapticEvent.ini
-//        ],
-//        parameters: [CHHapticDynamicParameter]()
-//    )
-    
-    let sustainTime = CHHapticEventParameter(parameterID: .sustained, value: 1) // If you want to sustain the haptic for its entire duration.
-//    CHHapticPattern.init(dictionary: <#T##[CHHapticPattern.Key : Any]#>)
-//    CHHapticPattern.init(
-//        dictionary: [
-//            .version: 1.0,
-//            .eventWaveformUseVolumeEnvelope:
-//        ]
-//    )
-    
-//    CHHapticPattern.init(dictionary: <#T##[CHHapticPattern.Key : Any]#>)
-//    CHHapticPattern.init(events: T##[CHHapticEvent], parameters: <#T##[CHHapticDynamicParameter]#>)
-//    CHHapticEvent.init(
-//        eventType: CHHapticEvent.EventType.hapticTransient,
-//        parameters: [CHHapticEventParameter.init(parameterID: .hapticIntensity, value: 1)],
-//        relativeTime: 1
-//    )
-    
-//    let engine = try! CHHapticEngine()
-//    try! engine.registerAudioResource(<#T##resourceURL: URL##URL#>)
-//
-//    CHHapticEvent.init(
-//        audioResourceID: <#T##CHHapticAudioResourceID#>,
-//        parameters: <#T##[CHHapticEventParameter]#>,
-//        relativeTime: <#T##TimeInterval#>,
-//        duration: <#T##TimeInterval#>
-//    )
-    
-    
 }

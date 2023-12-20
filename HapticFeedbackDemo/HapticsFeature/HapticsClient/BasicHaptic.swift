@@ -1,5 +1,5 @@
 //
-//  HapticType.swift
+//  BasicHaptic.swift
 //  HapticFeedbackDemo
 //
 //  Created by Jamie Chu on 12/12/23.
@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct HapticType: Hashable, CaseIterable {
+struct BasicHaptic: Hashable, CaseIterable {
     let rawValue: String
     let category: Category
         
@@ -18,52 +18,52 @@ struct HapticType: Hashable, CaseIterable {
         case selectionFeedback
     }
         
-    static let light = HapticType(
+    static let light = BasicHaptic(
         rawValue: "Light",
         category: .feedback(.light)
     )
     
-    static let medium = HapticType(
+    static let medium = BasicHaptic(
         rawValue: "Medium",
         category: .feedback(.medium)
     )
     
-    static let heavy = HapticType(
+    static let heavy = BasicHaptic(
         rawValue: "Heavy",
         category: .feedback(.heavy)
     )
     
-    static let soft = HapticType(
+    static let soft = BasicHaptic(
         rawValue: "Soft",
         category: .feedback(.soft)
     )
     
-    static let rigid = HapticType(
+    static let rigid = BasicHaptic(
         rawValue: "Rigid",
         category: .feedback(.rigid)
     )
     
-    static let success = HapticType(
+    static let success = BasicHaptic(
         rawValue: "Success",
         category: .notificationFeedback(.success)
     )
     
-    static let error = HapticType(
+    static let error = BasicHaptic(
         rawValue: "Error",
         category: .notificationFeedback(.error)
     )
     
-    static let warning = HapticType(
+    static let warning = BasicHaptic(
         rawValue: "Warning",
         category: .notificationFeedback(.warning)
     )
     
-    static let selectionChanged = HapticType(
+    static let selectionChanged = BasicHaptic(
         rawValue: "Selection Feedback",
         category: .selectionFeedback
     )
     
-    static var allCases: [HapticType] {
+    static var allCases: [BasicHaptic] {
         [
             light,
             medium,

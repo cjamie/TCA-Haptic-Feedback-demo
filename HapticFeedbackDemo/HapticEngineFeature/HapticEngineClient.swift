@@ -9,11 +9,30 @@ import Foundation
 
 struct HapticEngineClient {
     let supportsHaptics: () -> Bool
-    let makeHapticEngine: () throws -> HapticEngine
+
+    private let _makeHapticEngine: (
+        _ resetHandler: @escaping () -> Void,
+        _ stoppedHandler: @escaping (String) -> Void
+    ) throws -> HapticEngine
+    
+    init(
+        supportsHaptics: @escaping () -> Bool,
+        _makeHapticEngine: @escaping (@escaping () -> Void, @escaping (String) -> Void) throws -> HapticEngine
+    ) {
+        self.supportsHaptics = supportsHaptics
+        self._makeHapticEngine = _makeHapticEngine
+    }
+    
+    func makeHapticEngine(
+        resetHandler: @escaping () -> Void,
+        stoppedHandler: @escaping (String) -> Void
+    ) throws -> HapticEngine {
+        try _makeHapticEngine(resetHandler, stoppedHandler)
+    }
     
     static let mock = HapticEngineClient(
         supportsHaptics: { true },
-        makeHapticEngine: {
+        _makeHapticEngine: { _, _ in
             HapticEngine(
                 objId: ObjectIdentifier(NSObject()),
                 start: {},
@@ -43,12 +62,12 @@ struct CHHapticPatternKey: Hashable {
     }
 }
 
-// CHHapticEngine
+// CHHapticEngine (misleading name, since is also able to support audio)
 struct HapticEngine: Hashable {
     let objId: ObjectIdentifier
     let start: () async throws -> Void
     let makePlayer: (HapticPattern) throws -> HapticPatternPlayer
-    
+        
     static func == (lhs: HapticEngine, rhs: HapticEngine) -> Bool {
         lhs.objId == rhs.objId
     }

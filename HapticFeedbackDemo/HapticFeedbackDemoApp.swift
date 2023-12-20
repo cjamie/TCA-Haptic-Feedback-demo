@@ -27,7 +27,7 @@ struct HapticFeedbackDemoApp: App {
                     store: Store(
                         initialState: HapticEngineFeature.State(),
                         reducer: {
-                            HapticEngineFeature(client: .live, copyClient: .live)
+                            HapticEngineFeature(client: .liveHaptic, copyClient: .live)
                                 ._printChanges()
                         }
                     )

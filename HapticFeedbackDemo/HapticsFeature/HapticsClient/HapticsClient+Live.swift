@@ -20,7 +20,7 @@ extension HapticsClient {
             let notificationGen = UINotificationFeedbackGenerator()
             let selectionGen = UISelectionFeedbackGenerator()
             
-            return HapticType.allCases.reduce(into: [:]) { acc, next in
+            return BasicHaptic.allCases.reduce(into: [:]) { acc, next in
                 switch next.category {
                 case .feedback(let style, _):
                     let gen = UIImpactFeedbackGenerator(style: style)
