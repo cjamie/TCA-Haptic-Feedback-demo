@@ -32,30 +32,11 @@ extension HapticEngineClient {
             
             engine.resetHandler = resetHandler
             engine.stoppedHandler = { reason in
-                let base: String
-                                
-                switch reason {
-                case .audioSessionInterrupt:
-                    base = "audioSessionInterrupt"
-                case .applicationSuspended:
-                    base = "applicationSuspended"
-                case .idleTimeout:
-                    base = "idleTimeout"
-                case .notifyWhenFinished:
-                    base = "notifyWhenFinished"
-                case .systemError:
-                    base = "systemError"
-                case .engineDestroyed:
-                    base = "engineDestroyed"
-                case .gameControllerDisconnect:
-                    base = "gameControllerDisconnect"
-                @unknown default:
-                    base = "@unknown default\(reason)"
-                }
+                let prefix = "engine.stoppedHandler: CHHapticEngine.StoppedReason."
+                let base = reason.canonicalName ?? "@unknown default\(reason)"
+                let suffix = "\n\treasonCode: \(reason.rawValue)"
                 
-                stoppedHandler(
-                    "engine.stoppedHandler: CHHapticEngine.StoppedReason." + base + "\n\treasonCode: \(reason.rawValue)"
-                )
+                stoppedHandler(prefix + base + suffix)
             }
             
             return hapticEngine
@@ -88,32 +69,13 @@ extension HapticEngineClient {
             
             engine.resetHandler = resetHandler
             engine.stoppedHandler = { reason in
-                let base: String
-                                
-                switch reason {
-                case .audioSessionInterrupt:
-                    base = "audioSessionInterrupt"
-                case .applicationSuspended:
-                    base = "applicationSuspended"
-                case .idleTimeout:
-                    base = "idleTimeout"
-                case .notifyWhenFinished:
-                    base = "notifyWhenFinished"
-                case .systemError:
-                    base = "systemError"
-                case .engineDestroyed:
-                    base = "engineDestroyed"
-                case .gameControllerDisconnect:
-                    base = "gameControllerDisconnect"
-                @unknown default:
-                    base = "@unknown default\(reason)"
-                }
+                let prefix = "engine.stoppedHandler: CHHapticEngine.StoppedReason."
+                let base = reason.canonicalName ?? "@unknown default\(reason)"
+                let suffix = "\n\treasonCode: \(reason.rawValue)"
                 
-                stoppedHandler(
-                    "engine.stoppedHandler: CHHapticEngine.StoppedReason." + base + "\n\treasonCode: \(reason.rawValue)"
-                )
+                stoppedHandler(prefix + base + suffix)
             }
-            
+
             return hapticEngine
         }
     )
@@ -406,4 +368,27 @@ func zz() {
     
     
 //    vv.sendParameters(parameters: [CHHapticDynamicParameter], atTime: TimeInterval)
+}
+
+extension CHHapticEngine.StoppedReason {
+    var canonicalName: String? {
+        switch self {
+        case .audioSessionInterrupt:
+            return "audioSessionInterrupt"
+        case .applicationSuspended:
+            return "applicationSuspended"
+        case .idleTimeout:
+            return "idleTimeout"
+        case .notifyWhenFinished:
+            return "notifyWhenFinished"
+        case .systemError:
+            return "systemError"
+        case .engineDestroyed:
+            return "engineDestroyed"
+        case .gameControllerDisconnect:
+            return "gameControllerDisconnect"
+        @unknown default:
+            return nil
+        }
+    }
 }
