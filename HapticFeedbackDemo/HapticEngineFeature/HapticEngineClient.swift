@@ -10,14 +10,16 @@ import Foundation
 struct HapticEngineClient {
     let supportsHaptics: () -> Bool
 
-    private let _makeHapticEngine: (
+    typealias HapticEngineFactory = (
         _ resetHandler: @escaping () -> Void,
         _ stoppedHandler: @escaping (String) -> Void
     ) throws -> HapticEngine
     
+    private let _makeHapticEngine: HapticEngineFactory
+    
     init(
         supportsHaptics: @escaping () -> Bool,
-        _makeHapticEngine: @escaping (@escaping () -> Void, @escaping (String) -> Void) throws -> HapticEngine
+        _makeHapticEngine: @escaping HapticEngineFactory
     ) {
         self.supportsHaptics = supportsHaptics
         self._makeHapticEngine = _makeHapticEngine
