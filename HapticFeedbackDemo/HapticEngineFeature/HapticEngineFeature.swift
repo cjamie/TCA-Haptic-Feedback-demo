@@ -13,8 +13,11 @@ struct HapticEngineFeature: Reducer {
     struct State: Equatable {
         var engine: HapticEngine?
         var localizedError: String?
+        var engineFailureDescription: String?
+
         var copyImage: String = "square.on.square"
         var copyColor: Color = .blue
+        
         @BindingState
         var hapticPattern = try! HapticPattern(
             events: vanillaHapticEventGen
@@ -34,6 +37,10 @@ struct HapticEngineFeature: Reducer {
                 hapticPattern.events = newValue.elements.map(\.event)
             }
         }
+        
+        var isEngineInBadState: Bool {
+            engineFailureDescription != nil
+        }
     }
     
     enum Action: BindableAction {
@@ -45,8 +52,10 @@ struct HapticEngineFeature: Reducer {
         case cancelPrettyJSONButtonTapped
         case onCopyPrettyJSONTapped
         case resetCopyImage
+        case onRestartEngineButtonTapped
         
         case onFailure(Error)
+        case onEngineFailure(Error)
 
         case hapticEvent(UUID, EditHapticEventFeature.Action)
         case binding(_ action: BindingAction<State>)
@@ -65,12 +74,15 @@ struct HapticEngineFeature: Reducer {
     var body: some ReducerOf<Self> {
         BindingReducer()
         Reduce { state, action in
+                        
             switch action {
             case .onAppear:
                 return .run { send in
                     do {
                         let engine = try client.makeHapticEngine(
-                            resetHandler: {},
+                            resetHandler: {
+                                
+                            },
                             stoppedHandler: { _ in }
                         )
                         try await engine.start()
@@ -80,9 +92,30 @@ struct HapticEngineFeature: Reducer {
                     }
                 }
                 .merge(with: .send(.onDisplayButtonTapped))
+                
             case .hapticEvent:
                 return .none
-
+            case .onEngineFailure(let error):
+                state.engineFailureDescription = error.localizedDescription
+                return .none
+            case .onRestartEngineButtonTapped:
+                
+                // TODO: - reduce duplication
+                return .run { send in
+                    do {
+                        let engine = try client.makeHapticEngine(
+                            resetHandler: {
+                                
+                            },
+                            stoppedHandler: { _ in }
+                        )
+                        try await engine.start()
+                        await send(.onEngineCreation(engine))
+                    } catch {
+                        await send(.onFailure(error))
+                    }
+                }
+                
             case .onFailure(let error):
                 state.localizedError = error.localizedDescription
                 return .none
@@ -174,6 +207,17 @@ struct HapticButtonView: View {
             ScrollView {
                 VStack {
                     Text(viewStore.localizedError ?? "Haptic Pattern detail")
+                    
+                    if viewStore.isEngineInBadState {
+                        Button(action: {
+                            viewStore.send(.onRestartEngineButtonTapped)
+                        }) {
+                            Text("Restart Engine")
+                                .font(.headline)
+                                .padding()
+                                .cornerRadius(10)
+                        }
+                    }
                         
                     Section("Events") {
                         VStack(alignment: .leading) {
