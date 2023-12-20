@@ -53,6 +53,7 @@ struct HapticEngineFeature: Reducer {
         case onCopyPrettyJSONTapped
         case resetCopyImage
         case onRestartEngineButtonTapped
+        case onStopEngineButtonTapped
         
         case onEngineFailure(Error)
 
@@ -76,12 +77,16 @@ struct HapticEngineFeature: Reducer {
             switch action {
             case .onAppear:
                 return startEngineEffect()
-                    .merge(with: .send(.onDisplayButtonTapped))
+//                    .merge(with: .send(.onDisplayButtonTapped))
                 
             case .hapticEvent:
                 return .none
             case .onEngineFailure(let error):
                 state.engineFailureDescription = error.localizedDescription
+                return .none
+            case .onStopEngineButtonTapped:
+                
+                state.engine?.start
                 return .none
             case .onRestartEngineButtonTapped:
                 return startEngineEffect()
@@ -101,6 +106,7 @@ struct HapticEngineFeature: Reducer {
             case .cancelPrettyJSONButtonTapped:
                 state.prettyJSONFormattedDescription = nil
                 return .none
+
             case .onCopyPrettyJSONTapped:
                 state.copyImage = "checkmark.circle.fill"
                 state.prettyJSONFormattedDescription.map(copyClient.copy)
@@ -164,14 +170,19 @@ struct HapticEngineFeature: Reducer {
         )
     }
     
+    // TODO: - implement real handlers for reset, and stopped..
     private func startEngineEffect() -> Effect<HapticEngineFeature.Action> {
         .run { send in
             do {
+                
+                throw NSError.init(domain: "", code: -1)
                 let engine = try client.makeHapticEngine(
                     resetHandler: {
-                        
+                        print("-=- reset handler called.. ")
                     },
-                    stoppedHandler: { _ in }
+                    stoppedHandler: {
+                        print("-=- stoppedHandler called.. \($0)")
+                    }
                 )
                 try await engine.start()
                 await send(.onEngineCreation(engine))
@@ -192,16 +203,31 @@ struct HapticButtonView: View {
                 VStack {
                     Text(viewStore.localizedError ?? "Haptic Pattern detail")
                     
-                    if viewStore.isEngineInBadState {
-                        Button(action: {
-                            viewStore.send(.onRestartEngineButtonTapped)
-                        }) {
-                            Text("Restart Engine")
-                                .font(.headline)
-                                .padding()
-                                .cornerRadius(10)
+                    
+                    HStack {
+                        
+                        
+                        if viewStore.isEngineInBadState {
+                            Button(action: {
+                                viewStore.send(.onRestartEngineButtonTapped)
+                            }) {
+                                Text("Restart Engine")
+                                    .font(.headline)
+                                    .padding()
+                                    .cornerRadius(10)
+                            }
+                        } else {
+                            Button(action: {
+                                viewStore.send(.onStopEngineButtonTapped)
+                            }) {
+                                Text("Stop Engine")
+                                    .font(.headline)
+                                    .padding()
+                                    .cornerRadius(10)
+                            }
                         }
                     }
+                    
                         
                     Section("Events") {
                         VStack(alignment: .leading) {
@@ -209,7 +235,10 @@ struct HapticButtonView: View {
                                 state: \.hapticEvents,
                                 action: HapticEngineFeature.Action.hapticEvent
                             )) {
-                                HapticEventDetailView(store: $0).padding()
+                                HapticEventDetailView(store: $0)
+                                    .padding()
+                                    .border(.red)
+                                    .padding()
                             }
                         }
                     }
