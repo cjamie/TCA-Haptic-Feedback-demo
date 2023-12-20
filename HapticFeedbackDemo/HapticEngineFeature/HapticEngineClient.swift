@@ -42,7 +42,7 @@ struct HapticEngineClient {
                 start: {},
                 makePlayer: { _ in .init(
                     start: { _ in },
-                    sendParameters: { _, _ in }
+                    _sendParameters: { _, _ in }
                 )}
             )
         }
@@ -163,10 +163,27 @@ struct HapticDynamicParameter: Hashable, Encodable {
 
 // CHHapticPatternPlayer
 struct HapticPatternPlayer {
-    let start: (TimeInterval) throws -> Void
-    
-    let sendParameters: (
+    typealias SendParameters = (
         _ parameters: [HapticDynamicParameter],
         _ time: TimeInterval
     ) throws -> Void
+    
+    let start: (TimeInterval) throws -> Void
+    
+    let _sendParameters: SendParameters
+
+    init(
+        start: @escaping (TimeInterval) throws -> Void,
+        _sendParameters: @escaping SendParameters
+    ) {
+        self.start = start
+        self._sendParameters = _sendParameters
+    }
+    
+    func sendParameters(
+        parameters: [HapticDynamicParameter],
+        atTime time: TimeInterval
+    ) throws {
+        try _sendParameters(parameters, time)
+    }
 }
