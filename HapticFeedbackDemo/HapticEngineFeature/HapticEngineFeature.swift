@@ -54,7 +54,6 @@ struct HapticEngineFeature: Reducer {
         case resetCopyImage
         case onRestartEngineButtonTapped
         
-        case onFailure(Error)
         case onEngineFailure(Error)
 
         case hapticEvent(UUID, EditHapticEventFeature.Action)
@@ -74,24 +73,10 @@ struct HapticEngineFeature: Reducer {
     var body: some ReducerOf<Self> {
         BindingReducer()
         Reduce { state, action in
-                        
             switch action {
             case .onAppear:
-                return .run { send in
-                    do {
-                        let engine = try client.makeHapticEngine(
-                            resetHandler: {
-                                
-                            },
-                            stoppedHandler: { _ in }
-                        )
-                        try await engine.start()
-                        await send(.onEngineCreation(engine))
-                    } catch {
-                        await send(.onFailure(error))
-                    }
-                }
-                .merge(with: .send(.onDisplayButtonTapped))
+                return startEngineEffect()
+                    .merge(with: .send(.onDisplayButtonTapped))
                 
             case .hapticEvent:
                 return .none
@@ -99,27 +84,8 @@ struct HapticEngineFeature: Reducer {
                 state.engineFailureDescription = error.localizedDescription
                 return .none
             case .onRestartEngineButtonTapped:
-                
-                // TODO: - reduce duplication
-                return .run { send in
-                    do {
-                        let engine = try client.makeHapticEngine(
-                            resetHandler: {
-                                
-                            },
-                            stoppedHandler: { _ in }
-                        )
-                        try await engine.start()
-                        await send(.onEngineCreation(engine))
-                    } catch {
-                        await send(.onFailure(error))
-                    }
-                }
-                
-            case .onFailure(let error):
-                state.localizedError = error.localizedDescription
-                return .none
-                
+                return startEngineEffect()
+
             case .onEngineCreation(let engine):
                 state.engine = engine
                 return .none
@@ -150,6 +116,7 @@ struct HapticEngineFeature: Reducer {
                 return .none
 
             case .onDemoButtonTapped:
+                state.engineFailureDescription = nil
                 state.localizedError = nil
 
                 guard client.supportsHaptics() else {
@@ -166,7 +133,7 @@ struct HapticEngineFeature: Reducer {
                     return .none
 
                 } catch {
-                    return .send(.onFailure(error))
+                    return .send(.onEngineFailure(error))
                 }
             case .binding:
                 return .none
@@ -195,6 +162,23 @@ struct HapticEngineFeature: Reducer {
                  EditHapticEventFeature()
              }
         )
+    }
+    
+    private func startEngineEffect() -> Effect<HapticEngineFeature.Action> {
+        .run { send in
+            do {
+                let engine = try client.makeHapticEngine(
+                    resetHandler: {
+                        
+                    },
+                    stoppedHandler: { _ in }
+                )
+                try await engine.start()
+                await send(.onEngineCreation(engine))
+            } catch {
+                await send(.onEngineFailure(error))
+            }
+        }
     }
 }
 

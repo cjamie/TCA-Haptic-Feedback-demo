@@ -21,7 +21,12 @@ extension HapticEngineClient {
                 makePlayer: { pattern in
                     let player = try engine.makePlayer(with: pattern.toCHHapticPattern())
                     
-                    return .init { try player.start(atTime: $0) }
+                    return .init(
+                        start: player.start(atTime:),
+                        sendParameters: { params, delay in
+                            try player.sendParameters(params.map(\.toCHHapticDynamicParameter), atTime: delay)
+                        }
+                    )
                 }
             )
             
@@ -58,6 +63,7 @@ extension HapticEngineClient {
     )
     
     // TODO: - is this necessary, or is the liveHaptic version able to also output audio bydefault?
+    // TODO: - promote to a static func, and make this reusable
     static let liveAudio = HapticEngineClient(
         supportsHaptics: {
             CHHapticEngine.capabilitiesForHardware().supportsAudio
@@ -71,9 +77,12 @@ extension HapticEngineClient {
                 makePlayer: { pattern in
                     let player = try engine.makePlayer(with: pattern.toCHHapticPattern())
                     
-                    return .init {
-                        try player.start(atTime: $0)
-                    }
+                    return .init(
+                        start: player.start(atTime:),
+                        sendParameters: { params, delay in
+                            try player.sendParameters(params.map(\.toCHHapticDynamicParameter), atTime: delay)
+                        }
+                    )
                 }
             )
             
@@ -390,4 +399,11 @@ extension CHHapticPatternKey {
             version,
         ]
     }
+}
+
+func zz() {
+//    let vv: CHHapticPatternPlayer
+    
+    
+//    vv.sendParameters(parameters: [CHHapticDynamicParameter], atTime: TimeInterval)
 }

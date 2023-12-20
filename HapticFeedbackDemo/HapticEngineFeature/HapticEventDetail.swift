@@ -70,8 +70,9 @@ struct HapticEventDetailView: View {
                         }
                         .pickerStyle(.segmented)
                     } header: {
-                        Text("eventType(CHHapticEvent): \(viewStore.event.eventType.rawValue)")
+                        Text("eventType(CHHapticEvent):")
                             .font(.system(size: 16, weight: .bold))
+                            .lineLimit(1)
                     }
                     
                     Section {
@@ -116,7 +117,7 @@ struct HapticEventDetailView: View {
                     }
                                         
                     Button(action: {
-                        viewStore.send(.onRandomizeButtonTapped)
+                        viewStore.send(.onRandomizeButtonTapped, animation: .bouncy)
                     }) {
                         Text("Randomize")
                     }

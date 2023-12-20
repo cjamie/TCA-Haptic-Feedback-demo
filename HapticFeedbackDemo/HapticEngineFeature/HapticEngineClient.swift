@@ -40,7 +40,10 @@ struct HapticEngineClient {
             HapticEngine(
                 objId: ObjectIdentifier(NSObject()),
                 start: {},
-                makePlayer: { _ in .init { _ in } }
+                makePlayer: { _ in .init(
+                    start: { _ in },
+                    sendParameters: { _, _ in }
+                )}
             )
         }
     )
@@ -161,4 +164,9 @@ struct HapticDynamicParameter: Hashable, Encodable {
 // CHHapticPatternPlayer
 struct HapticPatternPlayer {
     let start: (TimeInterval) throws -> Void
+    
+    let sendParameters: (
+        _ parameters: [HapticDynamicParameter],
+        _ time: TimeInterval
+    ) throws -> Void
 }
