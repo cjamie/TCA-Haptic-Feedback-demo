@@ -60,8 +60,8 @@ extension HapticEngineClient {
                     
                     return .init(
                         start: player.start(atTime:),
-                        _sendParameters: { params, delay in
-                            try player.sendParameters(params.map(\.toCHHapticDynamicParameter), atTime: delay)
+                        _sendParameters: { params, time in
+                            try player.sendParameters(params.map(\.toCHHapticDynamicParameter), atTime: time)
                         }
                     )
                 }

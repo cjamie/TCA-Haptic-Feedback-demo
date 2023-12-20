@@ -7,9 +7,11 @@
 
 import SwiftUI
 import ComposableArchitecture
-//import AVFoundation
 
-struct AudioEngineFeature: Reducer {
+
+// this will be able to produce sounds.. and we need an audio generator..
+
+struct PresetAudioEngineFeature: Reducer {
     struct State: Equatable {
         
     }
@@ -29,9 +31,9 @@ struct AudioEngineFeature: Reducer {
 }
 
 
-struct AudioEngineView: View {
+struct PresetAudioEngineView: View {
     
-    let store: StoreOf<AudioEngineFeature>
+    let store: StoreOf<PresetAudioEngineFeature>
 
     var body: some View {
         Text("audio engine view")
@@ -39,11 +41,11 @@ struct AudioEngineView: View {
 }
 
 #Preview {
-    AudioEngineView.init(
-        store: Store.init(
-            initialState: AudioEngineFeature.State(),
+    PresetAudioEngineView(
+        store: Store(
+            initialState: PresetAudioEngineFeature.State(),
             reducer: {
-                AudioEngineFeature()
+                PresetAudioEngineFeature()
             }
         )
     )
