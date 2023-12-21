@@ -105,9 +105,15 @@ struct HapticEvent: Hashable, Encodable {
         }
         
         let id: UUID
-        let parameterID: ParameterID
+        var parameterID: ParameterID
         var value: Float
-        let range: ClosedRange<Float>
+        var range: ClosedRange<Float>
+        
+        mutating func change(to: Self) {
+            parameterID = to.parameterID
+            value = to.value
+            range = to.range
+        }
     }
     
     let id: UUID

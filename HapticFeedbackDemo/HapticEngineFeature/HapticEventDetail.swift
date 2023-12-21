@@ -24,9 +24,12 @@ struct EditHapticEventFeature: Reducer {
         case binding(_ action: BindingAction<State>)
         case onDelete(IndexSet)
         case onRandomizeButtonTapped
-        case onAddEventParameterButtonTapped
+        case onAddEventParameterButtonTapped(ScrollViewProxy)
+        case scrollTo(ScrollViewProxy, UUID)
     }
     
+    @Dependency(\.continuousClock) var clock
+
     var body: some ReducerOf<Self> {
         BindingReducer()
         Reduce { state, action in
@@ -42,14 +45,33 @@ struct EditHapticEventFeature: Reducer {
                 return .none
                 
             case .onRandomizeButtonTapped:
-                state.event.change(to: vanillaHapticEventGen.run())
+                let new = vanillaHapticEventGen.run()
+
+                var copy = state.event
+                copy.eventType = new.eventType
+                copy.relativeTime = new.relativeTime
+                copy.duration = new.duration
+
+                for indice in copy.parameters.indices {
+                    copy.parameters[indice].change(to: hapticEventParam.run())
+                }
+
+                state.event = copy
+                
                 return .none
                 
-            case .onAddEventParameterButtonTapped:
+            case .onAddEventParameterButtonTapped(let proxy):
                 // TODO: injection
-                state.event.parameters
-                    .append(hapticEventParam.run())
-                
+                let new = hapticEventParam.run()
+                state.event.parameters.append(new)
+                return .run { [id = new.id] send in
+                    try await clock.sleep(for: .milliseconds(100))
+
+                    await send(.scrollTo(proxy, id), animation: .spring(.snappy, blendDuration: 0.3))
+                }
+            case .scrollTo(let proxy, let id):
+                proxy.scrollTo(id, anchor: .top)
+
                 return .none
             }
         }
@@ -74,34 +96,36 @@ struct HapticEventDetailView: View {
                         .font(.system(size: 16, weight: .bold))
                         .lineLimit(1)
                 }
-                
-                Section {
-                    List {
-                        ForEach(viewStore.$event.parameters, id: \.id) { param in
-                            VStack(alignment: .leading) {
-                                Slider(value: param.value, in: param.wrappedValue.range)
-                                Text("value(Float): " + param.wrappedValue.value.formatted())
-                                    .font(.subheadline)
-                                Text("parameterID(CHHapticEvent.ParameterID): " + param.wrappedValue.parameterID.rawValue)
-                                    .font(.caption)
-                            }
+                                    
+                ScrollViewReader { proxy in
+                    VStack {
+                        HStack {
+                            Text("parameters([CHHapticEventParameter]):")
+                                .font(.system(size: 16, weight: .bold))
+                            
+                            Button(action: {
+                                viewStore.send(.onAddEventParameterButtonTapped(proxy))
+                            }, label: {
+                                HStack(spacing: .zero) {
+                                    Image(systemName: "plus")
+                                    Text("Parameter")
+                                }
+                            })
                         }
-                        .onDelete { viewStore.send(.onDelete($0)) }
-                    }
-                    .frame(height: 300)
-                } header: {
-                    HStack {
-                        Text("parameters([CHHapticEventParameter]):")
-                            .font(.system(size: 16, weight: .bold))
                         
-                        Button(action: {
-                            viewStore.send(.onAddEventParameterButtonTapped)
-                        }, label: {
-                            HStack {
-                                Image(systemName: "plus")
-                                Text("Parameter")
+                        List {
+                            ForEach(viewStore.$event.parameters, id: \.id) { param in
+                                VStack(alignment: .leading) {
+                                    Slider(value: param.value, in: param.wrappedValue.range)
+                                    Text("value(Float): " + param.wrappedValue.value.formatted())
+                                        .font(.subheadline)
+                                    Text("parameterID(CHHapticEvent.ParameterID): " + param.wrappedValue.parameterID.rawValue)
+                                        .font(.caption)
+                                }.id(param.wrappedValue.id)
                             }
-                        })
+                            .onDelete { viewStore.send(.onDelete($0)) }
+                        }
+                        .frame(height: 300)
                     }
                 }
                 
@@ -125,9 +149,7 @@ struct HapticEventDetailView: View {
                     Text("Randomize")
                 }
             }
-            .onAppear {
-                viewStore.send(.onAppear)
-            }
+            .onAppear { viewStore.send(.onAppear) }
         }
     }
 }
@@ -141,6 +163,7 @@ struct HapticEventDetailView: View {
                 ),
                 reducer: {
                     EditHapticEventFeature()
+                        ._printChanges()
                 }
             )
         )
