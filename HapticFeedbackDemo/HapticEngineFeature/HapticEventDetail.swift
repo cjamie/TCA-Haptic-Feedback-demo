@@ -64,7 +64,7 @@ struct EditHapticEventFeature: Reducer {
                 // TODO: injection
                 let new = hapticEventParam.run()
                 state.event.parameters.append(new)
-                return .run { [id = new.id] send in
+                return .run { [id = new.id, proxy] send in
                     try await clock.sleep(for: .milliseconds(100))
 
                     await send(.scrollTo(proxy, id), animation: .spring(.snappy, blendDuration: 0.3))
@@ -170,3 +170,5 @@ struct HapticEventDetailView: View {
         .padding()
     }
 }
+
+extension ScrollViewProxy: @unchecked Sendable {}
