@@ -46,3 +46,5 @@ func map<A, B>(
 ) ->([A]) -> [B] {    
     { $0.map(f) }
 }
+
+extension ScrollViewProxy: @unchecked Sendable {}

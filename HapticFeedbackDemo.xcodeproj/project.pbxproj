@@ -9,6 +9,25 @@
 /* Begin PBXBuildFile section */
 		5F0CE2032B3240FF00C70CFC /* CopyClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F0CE2022B3240FF00C70CFC /* CopyClient.swift */; };
 		5F0CE2062B324A4800C70CFC /* PresetAudioEngineFeature.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F0CE2052B324A4800C70CFC /* PresetAudioEngineFeature.swift */; };
+		5F0CE21B2B34DB2400C70CFC /* Dots - Fine.png in Resources */ = {isa = PBXBuildFile; fileRef = 5F0CE2082B34DB2200C70CFC /* Dots - Fine.png */; };
+		5F0CE21C2B34DB2400C70CFC /* Texture.ahap in Resources */ = {isa = PBXBuildFile; fileRef = 5F0CE2092B34DB2200C70CFC /* Texture.ahap */; };
+		5F0CE21D2B34DB2400C70CFC /* CollisionShield.wav in Resources */ = {isa = PBXBuildFile; fileRef = 5F0CE20A2B34DB2300C70CFC /* CollisionShield.wav */; };
+		5F0CE21E2B34DB2400C70CFC /* CollisionLarge.wav in Resources */ = {isa = PBXBuildFile; fileRef = 5F0CE20B2B34DB2300C70CFC /* CollisionLarge.wav */; };
+		5F0CE21F2B34DB2400C70CFC /* ShieldA.wav in Resources */ = {isa = PBXBuildFile; fileRef = 5F0CE20C2B34DB2300C70CFC /* ShieldA.wav */; };
+		5F0CE2202B34DB2400C70CFC /* Implode.ahap in Resources */ = {isa = PBXBuildFile; fileRef = 5F0CE20D2B34DB2300C70CFC /* Implode.ahap */; };
+		5F0CE2212B34DB2400C70CFC /* Dots - Coarse.png in Resources */ = {isa = PBXBuildFile; fileRef = 5F0CE20E2B34DB2300C70CFC /* Dots - Coarse.png */; };
+		5F0CE2222B34DB2400C70CFC /* CollisionSmall.wav in Resources */ = {isa = PBXBuildFile; fileRef = 5F0CE20F2B34DB2300C70CFC /* CollisionSmall.wav */; };
+		5F0CE2232B34DB2400C70CFC /* CollisionSmall.ahap in Resources */ = {isa = PBXBuildFile; fileRef = 5F0CE2102B34DB2300C70CFC /* CollisionSmall.ahap */; };
+		5F0CE2242B34DB2400C70CFC /* CollisionLarge.ahap in Resources */ = {isa = PBXBuildFile; fileRef = 5F0CE2112B34DB2300C70CFC /* CollisionLarge.ahap */; };
+		5F0CE2252B34DB2400C70CFC /* CollisionShield.ahap in Resources */ = {isa = PBXBuildFile; fileRef = 5F0CE2122B34DB2300C70CFC /* CollisionShield.ahap */; };
+		5F0CE2262B34DB2400C70CFC /* ShieldB.wav in Resources */ = {isa = PBXBuildFile; fileRef = 5F0CE2132B34DB2300C70CFC /* ShieldB.wav */; };
+		5F0CE2272B34DB2400C70CFC /* Implode.wav in Resources */ = {isa = PBXBuildFile; fileRef = 5F0CE2142B34DB2300C70CFC /* Implode.wav */; };
+		5F0CE2282B34DB2400C70CFC /* ShieldContinuous.ahap in Resources */ = {isa = PBXBuildFile; fileRef = 5F0CE2152B34DB2300C70CFC /* ShieldContinuous.ahap */; };
+		5F0CE2292B34DB2400C70CFC /* Grow.ahap in Resources */ = {isa = PBXBuildFile; fileRef = 5F0CE2162B34DB2300C70CFC /* Grow.ahap */; };
+		5F0CE22A2B34DB2400C70CFC /* Grow.wav in Resources */ = {isa = PBXBuildFile; fileRef = 5F0CE2172B34DB2300C70CFC /* Grow.wav */; };
+		5F0CE22B2B34DB2400C70CFC /* ShieldTransient.ahap in Resources */ = {isa = PBXBuildFile; fileRef = 5F0CE2182B34DB2300C70CFC /* ShieldTransient.ahap */; };
+		5F0CE22C2B34DB2400C70CFC /* Spawn.wav in Resources */ = {isa = PBXBuildFile; fileRef = 5F0CE2192B34DB2400C70CFC /* Spawn.wav */; };
+		5F0CE22D2B34DB2400C70CFC /* Spawn.ahap in Resources */ = {isa = PBXBuildFile; fileRef = 5F0CE21A2B34DB2400C70CFC /* Spawn.ahap */; };
 		5F3882D72B294E9500C807B8 /* MyFeedbackGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F3882D62B294E9500C807B8 /* MyFeedbackGenerator.swift */; };
 		5F3882D92B2957B100C807B8 /* HapticsClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F3882D82B2957B100C807B8 /* HapticsClient.swift */; };
 		5F3882DB2B2957CE00C807B8 /* HapticsClient+Live.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F3882DA2B2957CE00C807B8 /* HapticsClient+Live.swift */; };
@@ -31,6 +50,25 @@
 /* Begin PBXFileReference section */
 		5F0CE2022B3240FF00C70CFC /* CopyClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CopyClient.swift; sourceTree = "<group>"; };
 		5F0CE2052B324A4800C70CFC /* PresetAudioEngineFeature.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PresetAudioEngineFeature.swift; sourceTree = "<group>"; };
+		5F0CE2082B34DB2200C70CFC /* Dots - Fine.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Dots - Fine.png"; sourceTree = "<group>"; };
+		5F0CE2092B34DB2200C70CFC /* Texture.ahap */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Texture.ahap; sourceTree = "<group>"; };
+		5F0CE20A2B34DB2300C70CFC /* CollisionShield.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = CollisionShield.wav; sourceTree = "<group>"; };
+		5F0CE20B2B34DB2300C70CFC /* CollisionLarge.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = CollisionLarge.wav; sourceTree = "<group>"; };
+		5F0CE20C2B34DB2300C70CFC /* ShieldA.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = ShieldA.wav; sourceTree = "<group>"; };
+		5F0CE20D2B34DB2300C70CFC /* Implode.ahap */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Implode.ahap; sourceTree = "<group>"; };
+		5F0CE20E2B34DB2300C70CFC /* Dots - Coarse.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Dots - Coarse.png"; sourceTree = "<group>"; };
+		5F0CE20F2B34DB2300C70CFC /* CollisionSmall.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = CollisionSmall.wav; sourceTree = "<group>"; };
+		5F0CE2102B34DB2300C70CFC /* CollisionSmall.ahap */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = CollisionSmall.ahap; sourceTree = "<group>"; };
+		5F0CE2112B34DB2300C70CFC /* CollisionLarge.ahap */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = CollisionLarge.ahap; sourceTree = "<group>"; };
+		5F0CE2122B34DB2300C70CFC /* CollisionShield.ahap */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = CollisionShield.ahap; sourceTree = "<group>"; };
+		5F0CE2132B34DB2300C70CFC /* ShieldB.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = ShieldB.wav; sourceTree = "<group>"; };
+		5F0CE2142B34DB2300C70CFC /* Implode.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = Implode.wav; sourceTree = "<group>"; };
+		5F0CE2152B34DB2300C70CFC /* ShieldContinuous.ahap */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = ShieldContinuous.ahap; sourceTree = "<group>"; };
+		5F0CE2162B34DB2300C70CFC /* Grow.ahap */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Grow.ahap; sourceTree = "<group>"; };
+		5F0CE2172B34DB2300C70CFC /* Grow.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = Grow.wav; sourceTree = "<group>"; };
+		5F0CE2182B34DB2300C70CFC /* ShieldTransient.ahap */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = ShieldTransient.ahap; sourceTree = "<group>"; };
+		5F0CE2192B34DB2400C70CFC /* Spawn.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = Spawn.wav; sourceTree = "<group>"; };
+		5F0CE21A2B34DB2400C70CFC /* Spawn.ahap */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Spawn.ahap; sourceTree = "<group>"; };
 		5F3882D62B294E9500C807B8 /* MyFeedbackGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MyFeedbackGenerator.swift; sourceTree = "<group>"; };
 		5F3882D82B2957B100C807B8 /* HapticsClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HapticsClient.swift; sourceTree = "<group>"; };
 		5F3882DA2B2957CE00C807B8 /* HapticsClient+Live.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "HapticsClient+Live.swift"; sourceTree = "<group>"; };
@@ -65,9 +103,36 @@
 		5F0CE2042B324A2E00C70CFC /* AudioEngineFeature */ = {
 			isa = PBXGroup;
 			children = (
+				5F0CE2072B34DB0D00C70CFC /* AudioAssets */,
 				5F0CE2052B324A4800C70CFC /* PresetAudioEngineFeature.swift */,
 			);
 			path = AudioEngineFeature;
+			sourceTree = "<group>";
+		};
+		5F0CE2072B34DB0D00C70CFC /* AudioAssets */ = {
+			isa = PBXGroup;
+			children = (
+				5F0CE2112B34DB2300C70CFC /* CollisionLarge.ahap */,
+				5F0CE20B2B34DB2300C70CFC /* CollisionLarge.wav */,
+				5F0CE2122B34DB2300C70CFC /* CollisionShield.ahap */,
+				5F0CE20A2B34DB2300C70CFC /* CollisionShield.wav */,
+				5F0CE2102B34DB2300C70CFC /* CollisionSmall.ahap */,
+				5F0CE20F2B34DB2300C70CFC /* CollisionSmall.wav */,
+				5F0CE20E2B34DB2300C70CFC /* Dots - Coarse.png */,
+				5F0CE2082B34DB2200C70CFC /* Dots - Fine.png */,
+				5F0CE2162B34DB2300C70CFC /* Grow.ahap */,
+				5F0CE2172B34DB2300C70CFC /* Grow.wav */,
+				5F0CE20D2B34DB2300C70CFC /* Implode.ahap */,
+				5F0CE2142B34DB2300C70CFC /* Implode.wav */,
+				5F0CE20C2B34DB2300C70CFC /* ShieldA.wav */,
+				5F0CE2132B34DB2300C70CFC /* ShieldB.wav */,
+				5F0CE2152B34DB2300C70CFC /* ShieldContinuous.ahap */,
+				5F0CE2182B34DB2300C70CFC /* ShieldTransient.ahap */,
+				5F0CE21A2B34DB2400C70CFC /* Spawn.ahap */,
+				5F0CE2192B34DB2400C70CFC /* Spawn.wav */,
+				5F0CE2092B34DB2200C70CFC /* Texture.ahap */,
+			);
+			path = AudioAssets;
 			sourceTree = "<group>";
 		};
 		5F3882DC2B29582300C807B8 /* HapticsClient */ = {
@@ -216,7 +281,26 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				5F0CE2262B34DB2400C70CFC /* ShieldB.wav in Resources */,
 				5FE18E672B290736009BD46C /* Preview Assets.xcassets in Resources */,
+				5F0CE22C2B34DB2400C70CFC /* Spawn.wav in Resources */,
+				5F0CE21E2B34DB2400C70CFC /* CollisionLarge.wav in Resources */,
+				5F0CE21C2B34DB2400C70CFC /* Texture.ahap in Resources */,
+				5F0CE2232B34DB2400C70CFC /* CollisionSmall.ahap in Resources */,
+				5F0CE2272B34DB2400C70CFC /* Implode.wav in Resources */,
+				5F0CE2222B34DB2400C70CFC /* CollisionSmall.wav in Resources */,
+				5F0CE22D2B34DB2400C70CFC /* Spawn.ahap in Resources */,
+				5F0CE21B2B34DB2400C70CFC /* Dots - Fine.png in Resources */,
+				5F0CE22B2B34DB2400C70CFC /* ShieldTransient.ahap in Resources */,
+				5F0CE21F2B34DB2400C70CFC /* ShieldA.wav in Resources */,
+				5F0CE21D2B34DB2400C70CFC /* CollisionShield.wav in Resources */,
+				5F0CE2212B34DB2400C70CFC /* Dots - Coarse.png in Resources */,
+				5F0CE2202B34DB2400C70CFC /* Implode.ahap in Resources */,
+				5F0CE2242B34DB2400C70CFC /* CollisionLarge.ahap in Resources */,
+				5F0CE22A2B34DB2400C70CFC /* Grow.wav in Resources */,
+				5F0CE2292B34DB2400C70CFC /* Grow.ahap in Resources */,
+				5F0CE2282B34DB2400C70CFC /* ShieldContinuous.ahap in Resources */,
+				5F0CE2252B34DB2400C70CFC /* CollisionShield.ahap in Resources */,
 				5FE18E642B290736009BD46C /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
