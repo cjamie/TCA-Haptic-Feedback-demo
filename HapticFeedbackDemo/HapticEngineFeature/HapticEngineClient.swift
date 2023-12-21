@@ -11,11 +11,10 @@ struct HapticEngineClient {
 
     typealias HapticEngineFactory = (
         _ resetHandler: @escaping () -> Void,
-        _ stoppedHandler: @escaping (String) -> Void
+        _ stoppedHandler: @escaping (StoppedReason) -> Void
     ) throws -> HapticEngine
 
     let supportsHaptics: () -> Bool
-
     
     private let _makeHapticEngine: HapticEngineFactory
     
@@ -29,17 +28,18 @@ struct HapticEngineClient {
     
     func makeHapticEngine(
         resetHandler: @escaping () -> Void,
-        stoppedHandler: @escaping (String) -> Void
+        stoppedHandler: @escaping (StoppedReason) -> Void
     ) throws -> HapticEngine {
         try _makeHapticEngine(resetHandler, stoppedHandler)
     }
     
     static let mock = HapticEngineClient(
         supportsHaptics: { true },
-        _makeHapticEngine: { _, _ in
+        _makeHapticEngine: { resetHandler, stoppedHandler in
             HapticEngine(
                 objId: ObjectIdentifier(NSObject()),
-                start: {},
+                start: resetHandler,
+                stop: { stoppedHandler(.engineDestroyed) },
                 makePlayer: { _ in .init(
                     start: { _ in },
                     _sendParameters: { _, _ in }
@@ -73,6 +73,7 @@ struct CHHapticPatternKey: Hashable {
 struct HapticEngine: Hashable {
     let objId: ObjectIdentifier
     let start: () async throws -> Void
+    let stop: () async throws -> Void
     let makePlayer: (HapticPattern) throws -> HapticPatternPlayer
         
     static func == (lhs: HapticEngine, rhs: HapticEngine) -> Bool {
@@ -169,7 +170,6 @@ struct HapticPatternPlayer {
     ) throws -> Void
     
     let start: (TimeInterval) throws -> Void
-    
     let _sendParameters: SendParameters
 
     init(

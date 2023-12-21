@@ -12,9 +12,9 @@ import ComposableArchitecture
 struct HapticEngineFeature: Reducer {
     struct State: Equatable {
         var engine: HapticEngine?
-        var localizedError: String?
+        var generalTitle: String?
         var engineFailureDescription: String?
-
+        
         var copyImage: String = "square.on.square"
         var copyColor: Color = .blue
         
@@ -24,7 +24,7 @@ struct HapticEngineFeature: Reducer {
                 .array(of: .always(2)).run(),
             parameters: []
         )
-
+        
         @BindingState
         var prettyJSONFormattedDescription: String?
         
@@ -52,11 +52,9 @@ struct HapticEngineFeature: Reducer {
         case cancelPrettyJSONButtonTapped
         case onCopyPrettyJSONTapped
         case resetCopyImage
-        case onRestartEngineButtonTapped
-        case onStopEngineButtonTapped
-        
+        case onToggleEngineStateButtonTapped
         case onEngineFailure(Error)
-
+        
         case hapticEvent(UUID, EditHapticEventFeature.Action)
         case binding(_ action: BindingAction<State>)
         
@@ -69,30 +67,45 @@ struct HapticEngineFeature: Reducer {
     let encoder = JSONEncoder().then {
         $0.outputFormatting = .prettyPrinted
     }
-
+    
     @Dependency(\.continuousClock) var clock
     var body: some ReducerOf<Self> {
         BindingReducer()
         Reduce { state, action in
             switch action {
             case .onAppear:
-                return startEngineEffect()
-//                    .merge(with: .send(.onDisplayButtonTapped))
-                
+                return startEngineEffect(engine: state.engine)
+                //                    .merge(with: .send(.onDisplayButtonTapped))
             case .hapticEvent:
                 return .none
             case .onEngineFailure(let error):
                 state.engineFailureDescription = error.localizedDescription
                 return .none
-            case .onStopEngineButtonTapped:
+            case .onToggleEngineStateButtonTapped:
+                if state.isEngineInBadState {
+                    state.engineFailureDescription = nil
+                    
+                    return .run { [state] send in
+                        do {
+                            try await state
+                                .engine
+                                .unwrapOrThrow()
+                                .stop()
+                            
+                            
+                        } catch {
+                            await send(.onEngineFailure(error))
+                        }
+                    }
+                    
+                } else {
+                    return startEngineEffect(engine: state.engine)
+                }
                 
-                state.engine?.start
-                return .none
-            case .onRestartEngineButtonTapped:
-                return startEngineEffect()
-
+                
             case .onEngineCreation(let engine):
                 state.engine = engine
+                state.engineFailureDescription = nil
                 return .none
                 
             case .onRandomizeButtonTapped:
@@ -101,17 +114,17 @@ struct HapticEngineFeature: Reducer {
                     state.hapticPattern.events[indice]
                         .change(to: vanillaHapticEventGen.run())
                 }
-
+                
                 return .none
             case .cancelPrettyJSONButtonTapped:
                 state.prettyJSONFormattedDescription = nil
                 return .none
-
+                
             case .onCopyPrettyJSONTapped:
                 state.copyImage = "checkmark.circle.fill"
                 state.prettyJSONFormattedDescription.map(copyClient.copy)
                 state.copyColor = .green
-
+                
                 return .run { send in
                     try await clock.sleep(for: .seconds(1))
                     await send(.resetCopyImage, animation: .bouncy)
@@ -120,13 +133,13 @@ struct HapticEngineFeature: Reducer {
                 state.copyImage = "square.on.square"
                 state.copyColor = .blue
                 return .none
-
+                
             case .onDemoButtonTapped:
                 state.engineFailureDescription = nil
-                state.localizedError = nil
-
+                state.generalTitle = nil
+                
                 guard client.supportsHaptics() else {
-                    state.localizedError = "Device does not support haptics."
+                    state.generalTitle = "Device does not support haptics."
                     return .none
                 }
                 
@@ -135,15 +148,15 @@ struct HapticEngineFeature: Reducer {
                         .unwrapOrThrow()
                         .makePlayer(state.hapticPattern)
                         .start(HapticTimeImmediate)
-
+                    
                     return .none
-
+                    
                 } catch {
                     return .send(.onEngineFailure(error))
                 }
             case .binding:
                 return .none
-
+                
             case .onDisplayButtonTapped:
                 
                 do {
@@ -152,7 +165,7 @@ struct HapticEngineFeature: Reducer {
                         encoding: .utf8
                     )
                 } catch {
-                    state.localizedError = error.localizedDescription
+                    state.generalTitle = error.localizedDescription
                 }
                 
                 return .none
@@ -171,12 +184,12 @@ struct HapticEngineFeature: Reducer {
     }
     
     // TODO: - implement real handlers for reset, and stopped..
-    private func startEngineEffect() -> Effect<HapticEngineFeature.Action> {
+    private func startEngineEffect(
+        engine: HapticEngine?
+    ) -> Effect<HapticEngineFeature.Action> {
         .run { send in
             do {
-                
-                throw NSError.init(domain: "", code: -1)
-                let engine = try client.makeHapticEngine(
+                let engine = try engine ?? client.makeHapticEngine(
                     resetHandler: {
                         print("-=- reset handler called.. ")
                     },
@@ -184,6 +197,7 @@ struct HapticEngineFeature: Reducer {
                         print("-=- stoppedHandler called.. \($0)")
                     }
                 )
+                
                 try await engine.start()
                 await send(.onEngineCreation(engine))
             } catch {
@@ -194,55 +208,38 @@ struct HapticEngineFeature: Reducer {
 }
 
 struct HapticButtonView: View {
-
+    
     let store: StoreOf<HapticEngineFeature>
-
+    
     var body: some View {
         WithViewStore(store, observe: { $0 }) { viewStore in
-            ScrollView {
-                VStack {
-                    Text(viewStore.localizedError ?? "Haptic Pattern detail")
+            VStack {
+                Text(viewStore.generalTitle ?? "Haptic Pattern detail")
+                Button(action: {
+                    viewStore.send(.onToggleEngineStateButtonTapped)
+                }) {
+                    Text(viewStore.isEngineInBadState ? "Restart Engine" : "Stop Engine")
+                        .font(.headline)
+                        .padding()
+                        .cornerRadius(10)
+                }
+                
+                // TODO: - add an add button here...
+                if !viewStore.isEngineInBadState {
                     
-                    
-                    HStack {
-                        
-                        
-                        if viewStore.isEngineInBadState {
-                            Button(action: {
-                                viewStore.send(.onRestartEngineButtonTapped)
-                            }) {
-                                Text("Restart Engine")
-                                    .font(.headline)
-                                    .padding()
-                                    .cornerRadius(10)
-                            }
-                        } else {
-                            Button(action: {
-                                viewStore.send(.onStopEngineButtonTapped)
-                            }) {
-                                Text("Stop Engine")
-                                    .font(.headline)
-                                    .padding()
-                                    .cornerRadius(10)
-                            }
-                        }
-                    }
-                    
-                        
-                    Section("Events") {
-                        VStack(alignment: .leading) {
+                    ScrollViewReader { proxy in
+                        List {
                             ForEachStore(store.scope(
                                 state: \.hapticEvents,
                                 action: HapticEngineFeature.Action.hapticEvent
                             )) {
                                 HapticEventDetailView(store: $0)
-                                    .padding()
-                                    .border(.red)
-                                    .padding()
+                            }.onDelete {
+                                print("-=- finally.. \($0)")
                             }
                         }
                     }
-                                        
+                    
                     Button(action: {
                         viewStore.send(.onDisplayButtonTapped)
                     }) {
@@ -251,7 +248,7 @@ struct HapticButtonView: View {
                             .padding()
                             .cornerRadius(10)
                     }
-                                        
+                    
                     HStack {
                         Button(action: {
                             viewStore.send(.onDemoButtonTapped)
@@ -261,7 +258,7 @@ struct HapticButtonView: View {
                                 .padding()
                                 .cornerRadius(10)
                         }
-
+                        
                         Button(action: {
                             viewStore.send(.onRandomizeButtonTapped)
                         }) {
@@ -271,10 +268,9 @@ struct HapticButtonView: View {
                                 .cornerRadius(10)
                         }
                     }
-                }.onAppear {
-                    viewStore.send(.onAppear)
                 }
             }
+            .onAppear { viewStore.send(.onAppear) }
             .sheet(
                 isPresented: viewStore.binding(
                     get: { $0.prettyJSONFormattedDescription != nil },

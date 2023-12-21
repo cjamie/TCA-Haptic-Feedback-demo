@@ -13,7 +13,7 @@ struct EditHapticEventFeature: Reducer {
     struct State: Equatable, Identifiable {
         @BindingState
         var event: HapticEvent
-
+        
         var id: UUID {
             event.id
         }
@@ -22,7 +22,7 @@ struct EditHapticEventFeature: Reducer {
     enum Action: BindableAction {
         case onAppear
         case binding(_ action: BindingAction<State>)
-        case onDeleteParameters(IndexSet)
+        case onDelete(IndexSet)
         case onRandomizeButtonTapped
         case onAddEventParameterButtonTapped
     }
@@ -33,19 +33,20 @@ struct EditHapticEventFeature: Reducer {
             switch action {
             case .binding:
                 return .none
-
+                
             case .onAppear:
                 return .none
-
-            case .onDeleteParameters(let indexSet):
+                
+            case .onDelete(let indexSet):
                 state.event.parameters.remove(atOffsets: indexSet)
                 return .none
-
+                
             case .onRandomizeButtonTapped:
                 state.event.change(to: vanillaHapticEventGen.run())
                 return .none
-
+                
             case .onAddEventParameterButtonTapped:
+                // TODO: injection
                 state.event.parameters
                     .append(hapticEventParam.run())
                 
@@ -57,76 +58,76 @@ struct EditHapticEventFeature: Reducer {
 
 struct HapticEventDetailView: View {
     let store: StoreOf<EditHapticEventFeature>
-
+    
     var body: some View {
         WithViewStore(store, observe: { $0 }) { viewStore in
-            ScrollView {
-                VStack(alignment: .leading, spacing: 10) {
-                    Section {
-                        Picker("Select an option", selection: viewStore.$event.eventType) {
-                            ForEach(HapticEvent.EventType.hapticCases, id: \.self) { option in
-                                Text(option.rawValue)
-                            }
-                        }
-                        .pickerStyle(.segmented)
-                    } header: {
-                        Text("eventType(CHHapticEvent):")
-                            .font(.system(size: 16, weight: .bold))
-                            .lineLimit(1)
-                    }
-                    
-                    Section {
-                        List {
-                            ForEach(viewStore.$event.parameters, id: \.id) { param in
-                                VStack(alignment: .leading) {
-                                    Slider(value: param.value, in: param.wrappedValue.range)
-                                    Text("value(Float): " + param.wrappedValue.value.formatted())
-                                    Text("parameterID(CHHapticEvent.ParameterID): " + param.wrappedValue.parameterID.rawValue)
-                                }
-                                .padding([.leading, .trailing], 8)
-                            }
-                            .onDelete {
-                                viewStore.send(.onDeleteParameters($0))
-                            }
-                        }.frame(height: 300)
-                    } header: {
-                        HStack {
-                            Text("parameters([CHHapticEventParameter]):")
-                                .font(.system(size: 16, weight: .bold))
-                            
-                            Button(action: {
-                                viewStore.send(.onAddEventParameterButtonTapped)
-                            }, label: {
-                                Text("add")
-                            })
+            VStack(alignment: .leading, spacing: 10) {
+                Section {
+                    Picker("Select an option", selection: viewStore.$event.eventType) {
+                        ForEach(HapticEvent.EventType.hapticCases, id: \.self) { option in
+                            Text(option.rawValue)
                         }
                     }
-                    
-                    Section {
-                        Slider(value: viewStore.$event.relativeTime, in: 0...10)
-                    } header: {
-                        Text("relativeTime(TimeInterval): \(viewStore.event.relativeTime.formatted())")
-                            .font(.system(size: 16, weight: .bold))
+                    .pickerStyle(.segmented)
+                } header: {
+                    Text("eventType(CHHapticEvent):")
+                        .font(.system(size: 16, weight: .bold))
+                        .lineLimit(1)
+                }
+                
+                Section {
+                    List {
+                        ForEach(viewStore.$event.parameters, id: \.id) { param in
+                            VStack(alignment: .leading) {
+                                Slider(value: param.value, in: param.wrappedValue.range)
+                                Text("value(Float): " + param.wrappedValue.value.formatted())
+                                    .font(.subheadline)
+                                Text("parameterID(CHHapticEvent.ParameterID): " + param.wrappedValue.parameterID.rawValue)
+                                    .font(.caption)
+                            }
+                        }
+                        .onDelete { viewStore.send(.onDelete($0)) }
                     }
-                    
-                    Section {
-                        Slider(value: viewStore.$event.duration, in: 0...10)
-                    } header: {
-                        Text("duration(TimeInterval):\(viewStore.event.duration.formatted())")
+                    .frame(height: 300)
+                } header: {
+                    HStack {
+                        Text("parameters([CHHapticEventParameter]):")
                             .font(.system(size: 16, weight: .bold))
-                    }
-                                        
-                    Button(action: {
-                        viewStore.send(.onRandomizeButtonTapped, animation: .bouncy)
-                    }) {
-                        Text("Randomize")
+                        
+                        Button(action: {
+                            viewStore.send(.onAddEventParameterButtonTapped)
+                        }, label: {
+                            HStack {
+                                Image(systemName: "plus")
+                                Text("Parameter")
+                            }
+                        })
                     }
                 }
-                .onAppear {
-                    viewStore.send(.onAppear)
+                
+                Section {
+                    Slider(value: viewStore.$event.relativeTime, in: 0...10)
+                } header: {
+                    Text("relativeTime(TimeInterval): \(viewStore.event.relativeTime.formatted())")
+                        .font(.system(size: 16, weight: .bold))
+                }
+                
+                Section {
+                    Slider(value: viewStore.$event.duration, in: 0...10)
+                } header: {
+                    Text("duration(TimeInterval):\(viewStore.event.duration.formatted())")
+                        .font(.system(size: 16, weight: .bold))
+                }
+                
+                Button(action: {
+                    viewStore.send(.onRandomizeButtonTapped, animation: .bouncy)
+                }) {
+                    Text("Randomize")
                 }
             }
-            //.navigationTitle("Edit Haptic Event")
+            .onAppear {
+                viewStore.send(.onAppear)
+            }
         }
     }
 }

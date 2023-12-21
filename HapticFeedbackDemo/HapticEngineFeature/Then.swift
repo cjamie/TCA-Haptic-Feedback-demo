@@ -96,3 +96,5 @@ extension JSONEncoder: Then {}
   extension UIOffset: Then {}
   extension UIRectEdge: Then {}
 #endif
+
+extension HapticEngine: Then {}
