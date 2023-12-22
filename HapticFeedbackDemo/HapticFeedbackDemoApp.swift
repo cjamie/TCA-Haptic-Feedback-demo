@@ -21,18 +21,18 @@ struct HapticFeedbackDemoApp: App {
 //            ))
 //            EmptyView()
             
-            NavigationStack {
-                
-                HapticButtonView(
-                    store: Store(
-                        initialState: HapticEngineFeature.State(),
-                        reducer: {
-                            HapticEngineFeature(client: .liveHaptic, copyClient: .live)
-                                ._printChanges()
-                        }
-                    )
-                )
-            }
+//            NavigationStack {
+//                
+//                HapticButtonView(
+//                    store: Store(
+//                        initialState: HapticEngineFeature.State(),
+//                        reducer: {
+//                            HapticEngineFeature(client: .liveHaptic, copyClient: .live)
+//                                ._printChanges()
+//                        }
+//                    )
+//                )
+//            }
             
 //            HapticEventDetailView(
 //                store: Store(
@@ -46,6 +46,16 @@ struct HapticFeedbackDemoApp: App {
 //                )
 //            )
 //            .padding()
+            
+            PresetAudioEngineView(
+                store: Store(
+                    initialState: PresetAudioEngineFeature.State(),
+                    reducer: {
+                        PresetAudioEngineFeature(namedLoaders: Named.allCases, client: .liveHaptic)
+                            ._printChanges()
+                    }
+                )
+            )
         }
     }
 }

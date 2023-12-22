@@ -28,6 +28,8 @@
 		5F0CE22B2B34DB2400C70CFC /* ShieldTransient.ahap in Resources */ = {isa = PBXBuildFile; fileRef = 5F0CE2182B34DB2300C70CFC /* ShieldTransient.ahap */; };
 		5F0CE22C2B34DB2400C70CFC /* Spawn.wav in Resources */ = {isa = PBXBuildFile; fileRef = 5F0CE2192B34DB2400C70CFC /* Spawn.wav */; };
 		5F0CE22D2B34DB2400C70CFC /* Spawn.ahap in Resources */ = {isa = PBXBuildFile; fileRef = 5F0CE21A2B34DB2400C70CFC /* Spawn.ahap */; };
+		5F0CE22F2B34EA6000C70CFC /* CHHapticPattern+Presets.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F0CE22E2B34EA6000C70CFC /* CHHapticPattern+Presets.swift */; };
+		5F0CE2312B35003000C70CFC /* Named.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F0CE2302B35003000C70CFC /* Named.swift */; };
 		5F3882D72B294E9500C807B8 /* MyFeedbackGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F3882D62B294E9500C807B8 /* MyFeedbackGenerator.swift */; };
 		5F3882D92B2957B100C807B8 /* HapticsClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F3882D82B2957B100C807B8 /* HapticsClient.swift */; };
 		5F3882DB2B2957CE00C807B8 /* HapticsClient+Live.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F3882DA2B2957CE00C807B8 /* HapticsClient+Live.swift */; };
@@ -69,6 +71,8 @@
 		5F0CE2182B34DB2300C70CFC /* ShieldTransient.ahap */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = ShieldTransient.ahap; sourceTree = "<group>"; };
 		5F0CE2192B34DB2400C70CFC /* Spawn.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = Spawn.wav; sourceTree = "<group>"; };
 		5F0CE21A2B34DB2400C70CFC /* Spawn.ahap */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Spawn.ahap; sourceTree = "<group>"; };
+		5F0CE22E2B34EA6000C70CFC /* CHHapticPattern+Presets.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CHHapticPattern+Presets.swift"; sourceTree = "<group>"; };
+		5F0CE2302B35003000C70CFC /* Named.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Named.swift; sourceTree = "<group>"; };
 		5F3882D62B294E9500C807B8 /* MyFeedbackGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MyFeedbackGenerator.swift; sourceTree = "<group>"; };
 		5F3882D82B2957B100C807B8 /* HapticsClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HapticsClient.swift; sourceTree = "<group>"; };
 		5F3882DA2B2957CE00C807B8 /* HapticsClient+Live.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "HapticsClient+Live.swift"; sourceTree = "<group>"; };
@@ -103,8 +107,10 @@
 		5F0CE2042B324A2E00C70CFC /* AudioEngineFeature */ = {
 			isa = PBXGroup;
 			children = (
-				5F0CE2072B34DB0D00C70CFC /* AudioAssets */,
+				5F0CE22E2B34EA6000C70CFC /* CHHapticPattern+Presets.swift */,
+				5F0CE2302B35003000C70CFC /* Named.swift */,
 				5F0CE2052B324A4800C70CFC /* PresetAudioEngineFeature.swift */,
+				5F0CE2072B34DB0D00C70CFC /* AudioAssets */,
 			);
 			path = AudioEngineFeature;
 			sourceTree = "<group>";
@@ -323,9 +329,11 @@
 				5FE18E602B290734009BD46C /* HapticFeedbackDemoApp.swift in Sources */,
 				5F5DAFF32B31321400300F8B /* Then.swift in Sources */,
 				5F9A5AD22B2A65A5007587A7 /* HapticEventDetail.swift in Sources */,
+				5F0CE22F2B34EA6000C70CFC /* CHHapticPattern+Presets.swift in Sources */,
 				5F3882DB2B2957CE00C807B8 /* HapticsClient+Live.swift in Sources */,
 				5F3882E12B29706600C807B8 /* HapticEngineFeature.swift in Sources */,
 				5F9A5AD72B2A6DB1007587A7 /* Gen+.swift in Sources */,
+				5F0CE2312B35003000C70CFC /* Named.swift in Sources */,
 				5F9A5ACE2B298CE7007587A7 /* HapticEngineClient.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

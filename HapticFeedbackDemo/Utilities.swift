@@ -29,14 +29,14 @@ extension Optional {
     }
 
     func unwrapOrThrow(_ error: Error) throws -> Wrapped {
-        guard let value = self else {
-            throw error
+        if let self {
+            return self
         }
-        return value
+        throw error
     }
 
     func unwrapOrThrow() throws -> Wrapped {
-        return try unwrapOrThrow(UnwrapError.nilValue)
+        try unwrapOrThrow(UnwrapError.nilValue)
     }
 }
 

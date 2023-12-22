@@ -7,17 +7,18 @@
 
 import CoreHaptics
 
-extension HapticEngineClient {
+extension HapticEngineClient where T == HapticPattern {
     static let liveHaptic = HapticEngineClient(
         supportsHaptics: {
             CHHapticEngine.capabilitiesForHardware().supportsHaptics
         },
         _makeHapticEngine: { resetHandler, stoppedHandler in
+            // NOTE: - this is not expected to fail.
             let engine = try CHHapticEngine()
             engine.resetHandler = resetHandler
             
             engine.stoppedHandler = {
-                stoppedHandler(StoppedReason($0))                
+                stoppedHandler(StoppedReason($0))
 //                stoppedHandler([
 //                    StoppedReason(chReason: $0).rawValue,
 //                    "\n\treasonCode: \($0.rawValue)"
@@ -91,6 +92,23 @@ extension HapticPattern {
             events: events.map(\.toCHHapticEvent),
             parameters: parameters.map(\.toCHHapticDynamicParameter)
         )
+    }
+    
+    init(raw: CHHapticPattern) throws {
+//        let dictionary = try raw.exportDictionary() // [CHHapticPattern.Key : Any]
+//        CHHapticPattern.Key.version
+        
+//        dictionary[.event]
+        
+//        dictionary[.pattern].map { events in
+//            events as? [[String: Any]]
+//        }?.unwrapOrThrow()
+//        
+//        dictionary.keys.map(\.rawValue)
+        
+//        (.some(1)).unwrapOrThrow()
+
+        throw Optional<Int>.UnwrapError.nilValue
     }
 }
 

@@ -7,20 +7,19 @@
 
 import Foundation
 
-struct HapticEngineClient {
+typealias HapticEngineFactory<T> = (
+    _ resetHandler: @escaping () -> Void,
+    _ stoppedHandler: @escaping (StoppedReason) -> Void
+) throws -> HapticEngine<T>
 
-    typealias HapticEngineFactory = (
-        _ resetHandler: @escaping () -> Void,
-        _ stoppedHandler: @escaping (StoppedReason) -> Void
-    ) throws -> HapticEngine
-
+struct HapticEngineClient<T> {
     let supportsHaptics: () -> Bool
     
-    private let _makeHapticEngine: HapticEngineFactory
+    private let _makeHapticEngine: HapticEngineFactory<T>
     
     init(
         supportsHaptics: @escaping () -> Bool,
-        _makeHapticEngine: @escaping HapticEngineFactory
+        _makeHapticEngine: @escaping HapticEngineFactory<T>
     ) {
         self.supportsHaptics = supportsHaptics
         self._makeHapticEngine = _makeHapticEngine
@@ -29,16 +28,25 @@ struct HapticEngineClient {
     func makeHapticEngine(
         resetHandler: @escaping () -> Void,
         stoppedHandler: @escaping (StoppedReason) -> Void
-    ) throws -> HapticEngine {
+    ) throws -> HapticEngine<T> {
         try _makeHapticEngine(resetHandler, stoppedHandler)
     }
-    
+}
+
+extension HapticEngineClient where T == HapticPattern {
     static let mock = HapticEngineClient(
         supportsHaptics: { true },
         _makeHapticEngine: { resetHandler, stoppedHandler in
-            HapticEngine(
+            var didCallStart = false
+            return HapticEngine(
                 objId: ObjectIdentifier(NSObject()),
-                start: resetHandler,
+                start: {
+                    if didCallStart {
+                        resetHandler()
+                    } else {
+                        didCallStart = true
+                    }
+                },
                 stop: { stoppedHandler(.engineDestroyed) },
                 makePlayer: { _ in .init(
                     start: { _ in },
@@ -70,11 +78,11 @@ struct CHHapticPatternKey: Hashable {
 }
 
 // CHHapticEngine (misleading name, since is also able to support audio)
-struct HapticEngine: Hashable {
+struct HapticEngine<T>: Hashable {
     let objId: ObjectIdentifier
     let start: () async throws -> Void
     let stop: () async throws -> Void
-    let makePlayer: (HapticPattern) throws -> HapticPatternPlayer
+    let makePlayer: (T) throws -> HapticPatternPlayer
         
     static func == (lhs: HapticEngine, rhs: HapticEngine) -> Bool {
         lhs.objId == rhs.objId
@@ -169,6 +177,7 @@ struct HapticDynamicParameter: Hashable, Encodable {
 }
 
 // CHHapticPatternPlayer
+// you can hold this in memory, and play it whenever you want.
 struct HapticPatternPlayer {
     typealias SendParameters = (
         _ parameters: [HapticDynamicParameter],

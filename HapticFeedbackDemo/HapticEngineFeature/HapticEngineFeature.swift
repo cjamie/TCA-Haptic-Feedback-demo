@@ -11,7 +11,7 @@ import ComposableArchitecture
 // shows a pattern, (with multiple events).
 struct HapticEngineFeature: Reducer {
     struct State: Equatable {
-        var engine: HapticEngine?
+        var engine: HapticEngine<HapticPattern>?
         var generalTitle: String?
         var engineFailureDescription: String?
         
@@ -46,7 +46,7 @@ struct HapticEngineFeature: Reducer {
     enum Action: BindableAction {
         case onAppear
         case onDemoButtonTapped
-        case onEngineCreation(HapticEngine)
+        case onEngineCreation(HapticEngine<HapticPattern>)
         case onRandomizeButtonTapped
         case onDisplayButtonTapped
         case cancelPrettyJSONButtonTapped
@@ -61,7 +61,7 @@ struct HapticEngineFeature: Reducer {
         case onFormattedDisplayDismissed
     }
     
-    let client: HapticEngineClient
+    let client: HapticEngineClient<HapticPattern>
     let copyClient: CopyClient
     
     let encoder = JSONEncoder().then {
@@ -185,7 +185,7 @@ struct HapticEngineFeature: Reducer {
     
     // TODO: - implement real handlers for reset, and stopped..
     private func startEngineEffect(
-        engine: HapticEngine?
+        engine: HapticEngine<HapticPattern>?
     ) -> Effect<HapticEngineFeature.Action> {
         .run { send in
             do {
