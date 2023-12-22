@@ -44,5 +44,13 @@ let vanillaHapticEventGen = zip(
     duration
 ).map(HapticEvent.init(id:eventType:parameters:relativeTime:duration:))
 
+let hapticPatternGen: Gen<HapticPattern> = zip(
+    vanillaHapticEventGen.array(of: .always(3)),
+    .always([])
+).map(HapticPattern.init(events:parameters:))
+
+let hapticPatternGens = hapticPatternGen
+    .array(of: .int(in: 3...7))
+
 // TODO: - make a generator of audio... this needs an entirely different init. (e.g. should eb with parameterKeys)
 

@@ -85,9 +85,13 @@ struct HapticPattern: Equatable, Encodable {
     var events: [HapticEvent]
     var parameters: [HapticDynamicParameter]
     
-    init(events: [HapticEvent], parameters: [HapticDynamicParameter]) throws {
+    init(events: [HapticEvent], parameters: [HapticDynamicParameter]) {
         self.events = events
         self.parameters = parameters
+    }
+    
+    var dynamicMock: Self {
+        hapticPatternGen.run()
     }
 }
 

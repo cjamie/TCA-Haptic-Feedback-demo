@@ -7,13 +7,13 @@
 
 import SwiftUI
 import ComposableArchitecture
-import CoreHaptics
 
 // this will be able to produce sounds.. and we need an audio generator..
 // under the hood, this is created by files, and not wave form generators.
 struct PresetAudioEngineFeature<Pattern: Equatable>: Reducer {
     struct State: Equatable {
         var engine: HapticEngine<Pattern>?
+        // TODO: - these can be playyers instead of patterns.
         var namedPatterns: IdentifiedArrayOf<Named<Pattern>> = []
         var errorString: String?
      }
@@ -32,19 +32,10 @@ struct PresetAudioEngineFeature<Pattern: Equatable>: Reducer {
         Reduce { state, action in
             switch action {
             case .onScenePhaseChanged(.inactive, .active):
-                return state.engine.map { engine in
-                   .run { send in
-                       do {
-                           try await engine.start()
-                       } catch {
-                           await send(.onEngineCreationResult(.failure(error)))
-                       }
-                   }
-               } ?? createEngine(client: client)
                 
+                return state.engine.map(startEngine) ?? createEngine(client: client)
             case .onScenePhaseChanged:
-
-                return .none
+                break
             case .onAppear:
                 do {
                     state.namedPatterns = try IdentifiedArray(
@@ -62,27 +53,21 @@ struct PresetAudioEngineFeature<Pattern: Equatable>: Reducer {
                                 
                 return createEngine(client: client)
             case .onEngineCreationResult(.success(let engine)):
-
                 state.engine = engine
+                return startEngine(engine)
 
-                return .run { [engine] send in
-                    do {
-                        try await engine.start()
-                    } catch {
-                        await send(.onEngineCreationResult(.failure(error)))
-                    }
-                }
             case .onEngineCreationResult(.failure(let error)):
                 state.engine = nil
                 state.errorString = error.localizedDescription
+
             case .onTryTapped(let id):
 
                 do {
-                    
                     let pattern = try state.namedPatterns[id: id].unwrapOrThrow().wrapped
 
                     let newPlayer = try state.engine.unwrapOrThrow().makePlayer(pattern)
 
+                    // TODO: - make configurable
                     try newPlayer.sendParameters(parameters: [
                         .init(parameterId: .hapticIntensityControl, value: 1, relativeTime: 0),
                         .init(parameterId: .audioVolumeControl, value: 1, relativeTime: 0)
@@ -103,7 +88,6 @@ struct PresetAudioEngineFeature<Pattern: Equatable>: Reducer {
 struct PresetAudioEngineView<T: Equatable>: View {
     @Environment(\.scenePhase) var scenePhase
 
-    @State var temp = ScenePhase.active
     let store: StoreOf<PresetAudioEngineFeature<T>>
 
     var body: some View {
@@ -114,15 +98,13 @@ struct PresetAudioEngineView<T: Equatable>: View {
                 }
    
                 ForEach(viewStore.namedPatterns) { namedPattern in
-                    Text(namedPattern.name)
                     Button(action: {
                         viewStore.send(.onTryTapped(namedPattern.id))
                     }, label: {
-                        Text("Try")
+                        Text("Try " + namedPattern.name)
                     })
                 }
-                
-                
+                                
                 Text("audio engine viw")
                     .onAppear {
                         viewStore.send(.onAppear)
@@ -135,30 +117,34 @@ struct PresetAudioEngineView<T: Equatable>: View {
     }
 }
 
+// TODO: - repair the preset.. should not import CoreHaptics
 #Preview("Infra preview") {
     PresetAudioEngineView(
         store: Store(
-            initialState: PresetAudioEngineFeature<CHHapticPattern>.State(),
+            initialState: PresetAudioEngineFeature<HapticPattern>.State(),
             reducer: {
-                PresetAudioEngineFeature(namedLoaders: Named.allCases, client: .liveCHHapticPattern)
-                    ._printChanges()
+                PresetAudioEngineFeature(
+                    namedLoaders: (3...8).map {
+                        .init(name: String($0), wrapped: .init(load: hapticPatternGen.run))
+                    },
+                    client: .mock
+                )._printChanges()
             }
         )
     )
 }
-//
-//extension ScenePhase: _Bindable {
-//    public var wrappedValue: ScenePhase {
-//        get {
-//            self
-//        }
-//        nonmutating set(newValue) {
-//            
-//        }
-//    }
-//    
-//    public typealias Value = ScenePhase
-//}
+
+private func startEngine<Pattern>(
+    _ engine: HapticEngine<Pattern>
+) -> Effect<PresetAudioEngineFeature<Pattern>.Action> {
+    .run { send in
+        do {
+            try await engine.start()
+        } catch {
+            await send(.onEngineCreationResult(.failure(error)))
+        }
+    }
+}
 
 private func createEngine<Pattern>(
     client: HapticEngineClient<Pattern>

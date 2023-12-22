@@ -66,12 +66,19 @@ extension Named where T == Loader<CHHapticPattern> {
         name: "ShieldTransient",
         wrapped: .init { try tryMakePattern("ShieldTransient") }
     )
+    /*
+     
+     
+     */
+    
+    static let advancedCases: [Self] = [
+        texturePattern        
+    ]
     
     static let allCases: [ Self ] = [
         collisionPatternSmall,
         collisionPatternLarge,
         collisionPatternShield,
-        texturePattern,
         spawnPattern,
         growPattern,
         shieldContinuousPattern,
