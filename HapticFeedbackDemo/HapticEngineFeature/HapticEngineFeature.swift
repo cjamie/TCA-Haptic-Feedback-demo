@@ -46,7 +46,7 @@ struct HapticEngineFeature: Reducer {
     enum Action: BindableAction {
         case onAppear
         case onDemoButtonTapped
-        case onEngineCreation(HapticEngine<HapticPattern>)
+        case onEngineCreationResult(Result<HapticEngine<HapticPattern>, Error>)
         case onRandomizeButtonTapped
         case onDisplayButtonTapped
         case cancelPrettyJSONButtonTapped
@@ -103,9 +103,17 @@ struct HapticEngineFeature: Reducer {
                 }
                 
                 
-            case .onEngineCreation(let engine):
-                state.engine = engine
-                state.engineFailureDescription = nil
+            case .onEngineCreationResult(let engineResult):
+
+                switch engineResult {
+                case .success(let engine):
+                    state.engine = engine
+                    state.engineFailureDescription = nil
+                case .failure(let error):
+                    state.engine = nil
+                    state.engineFailureDescription = error.localizedDescription
+                }
+
                 return .none
                 
             case .onRandomizeButtonTapped:
@@ -199,9 +207,9 @@ struct HapticEngineFeature: Reducer {
                 )
                 
                 try await engine.start()
-                await send(.onEngineCreation(engine))
+                await send(.onEngineCreationResult(.success(engine)))
             } catch {
-                await send(.onEngineFailure(error))
+                await send(.onEngineCreationResult(.failure(error)))
             }
         }
     }

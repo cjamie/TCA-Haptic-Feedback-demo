@@ -16,7 +16,6 @@ extension HapticEngineClient where T == HapticPattern {
             // NOTE: - this is not expected to fail.
             let engine = try CHHapticEngine()
             engine.resetHandler = resetHandler
-            
             engine.stoppedHandler = {
                 stoppedHandler(StoppedReason($0))
 //                stoppedHandler([
@@ -67,7 +66,7 @@ extension HapticEngineClient where T == CHHapticPattern {
 //            engine.stop()
             
             return HapticEngine(
-                objId: ObjectIdentifier(NSObject()),
+                objId: ObjectIdentifier(engine),
                 start: engine.start,
                 stop: { stoppedHandler(.engineDestroyed) },
                 makePlayer: { pattern in
