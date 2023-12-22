@@ -20,23 +20,45 @@ struct PresetAudioEngineFeature<Pattern: Equatable>: Reducer {
 //    }
     
     struct State: Equatable {
-        var engine: HapticEngine<HapticPattern>?
+        var engine: HapticEngine<Pattern>?
         var namedPatterns: IdentifiedArrayOf<Named<Pattern>> = []
         var errorString: String?
         
+        @BindingState
+        var scenePhase: ScenePhase = .active
     }
 
     enum Action {
         case onAppear
         case onTryTapped(Named<Pattern>.ID)
+        case onEngineCreation(HapticEngine<Pattern>)
+        case onScenePhaseChanged(ScenePhase, ScenePhase)
     }
     
     let namedLoaders: [Named<Loader<Pattern>>]
-    let client: HapticEngineClient<HapticPattern>
+    let client: HapticEngineClient<Pattern>
     
     var body: some ReducerOf<Self> {
         Reduce { state, action in
             switch action {
+            case .onScenePhaseChanged(let old, let new):
+                switch (old, new) {
+                case (.inactive, .active):
+//                case (_, .background)
+                    
+                    return .run { [state] send in
+                        do {
+                            
+                            try await state.engine?.start()
+                        }
+                        //                    await send(.onEngineCreation(engine))
+                        
+                    }
+                default:
+                    return .none
+                }
+                
+                
             case .onAppear:
                 // load your audio patterns
                 do {
@@ -65,14 +87,34 @@ struct PresetAudioEngineFeature<Pattern: Equatable>: Reducer {
                             )
                             
                             try await engine.start()
+                            await send(.onEngineCreation(engine))
                         } catch {
                             
                         }
                     }
+            case .onEngineCreation(let engine):
+                
+                state.engine = engine
+                return .none
             case .onTryTapped(let id):
 
                 // TODO: - we need to be able to plug this pattern, into the engine.
-                state.namedPatterns[id: id]?.wrapped
+                
+                do {
+                    
+                    let zz = try state.namedPatterns[id: id].unwrapOrThrow()
+                    let newPlayer = try state.engine?.makePlayer(zz.wrapped)
+                    try newPlayer?.sendParameters(parameters: [
+                        .init(parameterId: .hapticIntensityControl, value: 1, relativeTime: 0),
+                        .init(parameterId: .audioVolumeControl, value: 1, relativeTime: 0)
+                    ], atTime: HapticTimeImmediate)
+                    try newPlayer?.start(HapticTimeImmediate)
+                    
+                    print("-=- done...")
+                } catch {
+                    state.errorString = error.localizedDescription
+                }
+                
                 return .none
             }
         }
@@ -81,12 +123,17 @@ struct PresetAudioEngineFeature<Pattern: Equatable>: Reducer {
 
 
 struct PresetAudioEngineView<T: Equatable>: View {
-    
+    @Environment(\.scenePhase) var scenePhase
+
+    @State var temp = ScenePhase.active
     let store: StoreOf<PresetAudioEngineFeature<T>>
 
     var body: some View {
         WithViewStore(store, observe: { $0 }) { viewStore in
             VStack {
+                viewStore.errorString.map {
+                    Text("somehting went wrong: " + $0)
+                }
    
                 ForEach(viewStore.namedPatterns) { namedPattern in
                     Text(namedPattern.name)
@@ -103,6 +150,9 @@ struct PresetAudioEngineView<T: Equatable>: View {
                         viewStore.send(.onAppear)
                     }
             }
+            .onChange(of: scenePhase) { oldPhase, newPhase in
+                viewStore.send(.onScenePhaseChanged(oldPhase, newPhase))
+            }
         }
     }
 }
@@ -112,9 +162,22 @@ struct PresetAudioEngineView<T: Equatable>: View {
         store: Store(
             initialState: PresetAudioEngineFeature<CHHapticPattern>.State(),
             reducer: {
-                PresetAudioEngineFeature(namedLoaders: Named.allCases, client: .mock)
+                PresetAudioEngineFeature(namedLoaders: Named.allCases, client: .liveCHHapticPattern)
                     ._printChanges()
             }
         )
     )
 }
+//
+//extension ScenePhase: _Bindable {
+//    public var wrappedValue: ScenePhase {
+//        get {
+//            self
+//        }
+//        nonmutating set(newValue) {
+//            
+//        }
+//    }
+//    
+//    public typealias Value = ScenePhase
+//}

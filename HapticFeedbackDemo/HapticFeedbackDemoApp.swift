@@ -51,7 +51,7 @@ struct HapticFeedbackDemoApp: App {
                 store: Store(
                     initialState: PresetAudioEngineFeature.State(),
                     reducer: {
-                        PresetAudioEngineFeature(namedLoaders: Named.allCases, client: .liveHaptic)
+                        PresetAudioEngineFeature(namedLoaders: Named.allCases, client: .liveCHHapticPattern)
                             ._printChanges()
                     }
                 )

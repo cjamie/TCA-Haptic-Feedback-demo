@@ -56,6 +56,29 @@ extension HapticEngineClient where T == HapticPattern {
         }
     )
 }
+//extension HapticEngineClient where T == CHHapticPattern {
+//    static let mock = HapticEngineClient(
+//        supportsHaptics: { true },
+//        _makeHapticEngine: { resetHandler, stoppedHandler in
+//            var didCallStart = false
+//            return HapticEngine(
+//                objId: ObjectIdentifier(NSObject()),
+//                start: {
+//                    if didCallStart {
+//                        resetHandler()
+//                    } else {
+//                        didCallStart = true
+//                    }
+//                },
+//                stop: { stoppedHandler(.engineDestroyed) },
+//                makePlayer: { _ in .init(
+//                    start: { _ in },
+//                    _sendParameters: { _, _ in }
+//                )}
+//            )
+//        }
+//    )
+//}
 
 // CHHapticPattern
 struct HapticPattern: Equatable, Encodable {

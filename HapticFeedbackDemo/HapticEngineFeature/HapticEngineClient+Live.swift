@@ -46,44 +46,51 @@ extension HapticEngineClient where T == HapticPattern {
             )
         }
     )
-    
-    // TODO: - is this necessary, or is the liveHaptic version able to also output audio bydefault?
-    // TODO: - promote to a static func, and make this reusable
-//    static let liveAudio = HapticEngineClient(
-//        supportsHaptics: {
-//            CHHapticEngine.capabilitiesForHardware().supportsAudio
-//        },
-//        _makeHapticEngine: { resetHandler, stoppedHandler in
-//            let engine = try CHHapticEngine(audioSession: .sharedInstance())
-//            
-//            let hapticEngine = HapticEngine(
-//                objId: ObjectIdentifier(engine),
-//                start: engine.start,
-//                makePlayer: { pattern in
-//                    let player = try engine.makePlayer(with: pattern.toCHHapticPattern())
-//                    
-//                    return .init(
-//                        start: player.start(atTime:),
-//                        _sendParameters: { params, time in
-//                            try player.sendParameters(params.map(\.toCHHapticDynamicParameter), atTime: time)
-//                        }
-//                    )
-//                }
-//            )
-//            
-//            engine.resetHandler = resetHandler
-//            engine.stoppedHandler = { reason in
-//                let prefix = "engine.stoppedHandler: CHHapticEngine.StoppedReason."
-//                let base = reason.canonicalName ?? "@unknown default\(reason)"
-//                let suffix = "\n\treasonCode: \(reason.rawValue)"
-//                
-//                stoppedHandler(prefix + base + suffix)
-//            }
-//
-//            return hapticEngine
-//        }, 
-//        stop: {}
-//    )
+}
+
+// this one is needed for the file-based audio
+extension HapticEngineClient where T == CHHapticPattern {
+    static let liveCHHapticPattern = HapticEngineClient(
+        supportsHaptics: { true },
+        _makeHapticEngine: { resetHandler, stoppedHandler in
+            let engine = try CHHapticEngine()
+            engine.resetHandler = resetHandler
+
+            
+            engine.stoppedHandler = {
+                stoppedHandler(StoppedReason($0))
+//                stoppedHandler([
+//                    StoppedReason(chReason: $0).rawValue,
+//                    "\n\treasonCode: \($0.rawValue)"
+//                ].reduce("engine.stoppedHandler: CHHapticEngine.StoppedReason.", +))
+            }
+//            engine.stop()
+            
+            return HapticEngine(
+                objId: ObjectIdentifier(NSObject()),
+                start: engine.start,
+                stop: { stoppedHandler(.engineDestroyed) },
+                makePlayer: { pattern in
+
+                    let player = try engine.makePlayer(with: pattern)
+                    
+                    return .init(
+                        start: player.start(atTime:),
+                        _sendParameters: { params, delay in
+                            try player.sendParameters(params.map(\.toCHHapticDynamicParameter), atTime: delay)
+                        }
+                    )
+
+                    
+//                        .init(
+//                            start: { _ in },
+//                            _sendParameters: { _, _ in }
+//                        )
+                    
+                }
+            )
+        }
+    )
 }
 
 extension HapticPattern {
