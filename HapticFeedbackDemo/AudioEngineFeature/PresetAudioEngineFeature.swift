@@ -10,35 +10,67 @@ import ComposableArchitecture
 
 // this will be able to produce sounds.. and we need an audio generator..
 // under the hood, this is created by files, and not wave form generators.
-struct PresetAudioEngineFeature<Pattern: Equatable>: Reducer {
+struct PresetAudioEngineFeature<P: Equatable>: Reducer {
     struct State: Equatable {
-        var engine: HapticEngine<Pattern>?
+        
+        enum EngineState<P>: Equatable {
+            enum State: Equatable {
+                case created
+                case started
+                case reset
+                case stopped(StoppedReason)
+            }
+            
+            case initialized(HapticEngine<P>, State)
+            case uninitialized
+            
+            var engine: HapticEngine<P>? {
+                switch self {
+                case .initialized(let engine, _):
+                    return engine
+                case .uninitialized:
+                    return nil
+                }
+            }
+        }
+
         // TODO: - these can be playyers instead of patterns.
-        var namedPatterns: IdentifiedArrayOf<Named<Pattern>> = []
+        var basicPatterns: IdentifiedArrayOf<Named<P>> = []
         var errorString: String?
-     }
+        var engineState: EngineState<P> = .uninitialized
+        
+        var engine: HapticEngine<P>? {
+            engineState.engine
+        }
+    }
 
     enum Action {
         case onAppear
-        case onTryTapped(Named<Pattern>.ID)
-        case onEngineCreationResult(Result<HapticEngine<Pattern>, Error>)
+        case onTryTapped(Named<P>.ID)
+        case onEngineCreationResult(Result<HapticEngine<P>, Error>)
+        case onEngineReset(HapticEngine<P>)
+        case onEngineStopped(HapticEngine<P>, StoppedReason)
+
         case onScenePhaseChanged(ScenePhase, ScenePhase)
     }
     
-    let namedLoaders: [Named<Loader<Pattern>>]
-    let client: HapticEngineClient<Pattern>
+    let namedLoaders: [Named<Loader<P>>]
+    let client: HapticEngineClient<P>
     
     var body: some ReducerOf<Self> {
         Reduce { state, action in
             switch action {
             case .onScenePhaseChanged(.inactive, .active):
-                
-                return state.engine.map(startEngine) ?? createEngine(client: client)
+                return ensureEngineIsInGoodState(
+                    client: client,
+                    engineState: state.engineState
+                )
             case .onScenePhaseChanged:
                 break
+
             case .onAppear:
                 do {
-                    state.namedPatterns = try IdentifiedArray(
+                    state.basicPatterns = try IdentifiedArray(
                         uniqueElements: namedLoaders.map {
                             try Named(
                                 name: $0.name,
@@ -53,30 +85,36 @@ struct PresetAudioEngineFeature<Pattern: Equatable>: Reducer {
                                 
                 return createEngine(client: client)
             case .onEngineCreationResult(.success(let engine)):
-                state.engine = engine
+                state.engineState = .initialized(engine, .created)
                 return startEngine(engine)
 
             case .onEngineCreationResult(.failure(let error)):
-                state.engine = nil
+                state.engineState = .uninitialized
                 state.errorString = error.localizedDescription
 
             case .onTryTapped(let id):
-
-                do {
-                    let pattern = try state.namedPatterns[id: id].unwrapOrThrow().wrapped
-
-                    let newPlayer = try state.engine.unwrapOrThrow().makePlayer(pattern)
-
-                    // TODO: - make configurable
-                    try newPlayer.sendParameters(parameters: [
-                        .init(parameterId: .hapticIntensityControl, value: 1, relativeTime: 0),
-                        .init(parameterId: .audioVolumeControl, value: 1, relativeTime: 0)
-                    ], atTime: HapticTimeImmediate)
-
-                    try newPlayer.start(HapticTimeImmediate)
-                } catch {
-                    state.errorString = error.localizedDescription
-                }
+                return .concatenate(
+                    ensureEngineIsInGoodState(
+                        client: client,
+                        engineState: state.engineState
+                    ),
+                    .run(operation: { [state] send in
+                        let pattern = try state.basicPatterns[id: id].unwrapOrThrow().wrapped
+                        let newPlayer = try state.engine.unwrapOrThrow().makePlayer(pattern)
+                        try newPlayer.sendParameters(parameters: [
+                            .init(parameterId: .hapticIntensityControl, value: 1, relativeTime: 0),
+                            .init(parameterId: .audioVolumeControl, value: 1, relativeTime: 0)
+                        ], atTime: HapticTimeImmediate)
+                        
+                        try newPlayer.start(HapticTimeImmediate)
+                    })
+                )
+            case .onEngineReset(let engine):
+                state.engineState = .initialized(engine, .reset)
+                return .none
+            case .onEngineStopped(let engine, let reason):
+                state.engineState = .initialized(engine, .stopped(reason))
+                return .none
             }
 
             return .none
@@ -92,16 +130,16 @@ struct PresetAudioEngineView<T: Equatable>: View {
 
     var body: some View {
         WithViewStore(store, observe: { $0 }) { viewStore in
-            VStack {
+            VStack(spacing: 20) {
                 viewStore.errorString.map {
-                    Text("somehting went wrong: " + $0)
+                    Text("Something went wrong: " + $0)
                 }
    
-                ForEach(viewStore.namedPatterns) { namedPattern in
+                ForEach(viewStore.basicPatterns) { namedPattern in
                     Button(action: {
                         viewStore.send(.onTryTapped(namedPattern.id))
                     }, label: {
-                        Text("Try " + namedPattern.name)
+                        Text(namedPattern.name)
                     })
                 }
                                 
@@ -146,22 +184,57 @@ private func startEngine<Pattern>(
     }
 }
 
+private func ensureEngineIsInGoodState<Pattern>(
+    client: HapticEngineClient<Pattern>,
+    engineState: PresetAudioEngineFeature<Pattern>.State.EngineState<Pattern>
+) -> Effect<PresetAudioEngineFeature<Pattern>.Action> {
+    switch engineState {
+    case .initialized(_, .started):
+        return .none
+    case .initialized(let engine, _):
+        return startEngine(engine)
+    case .uninitialized:
+        return createEngine(client: client)
+    }
+}
+
+private enum CancelID {
+    case engineCreation
+}
+
 private func createEngine<Pattern>(
     client: HapticEngineClient<Pattern>
 ) -> Effect<PresetAudioEngineFeature<Pattern>.Action> {
     .run { send in
         do {
-            try await send(.onEngineCreationResult(.success(client.makeHapticEngine(
-                resetHandler: {
-                    print("-=- reset handler called.. ")
+            var cache: HapticEngine<Pattern>?
+                        
+            let engine = try client.makeHapticEngine(
+                resetHandler: { 
+                    Task { [cache] in
+                        if let cache {
+                            await send(.onEngineReset(cache))
+                        }
+                    }
                 },
-                stoppedHandler: {
-                    print("-=- stoppedHandler called.. \($0)")
+                stoppedHandler: { reason in
+                    Task { [cache] in
+                        if let cache {
+                            await send(.onEngineStopped(cache, reason))
+                        }
+                    }
                 }
-            ))))
+            )
+            
 
+            cache = engine
+                        
+            await send(.onEngineCreationResult(.success(engine)))
+            try await Task.sleep(for: .seconds(1))
+            
+            try await engine.stop()
         } catch {
             await send(.onEngineCreationResult(.failure(error)))
         }
-    }
+    }.debounce(id: CancelID.engineCreation, for: .milliseconds(100), scheduler: DispatchQueue.main)
 }

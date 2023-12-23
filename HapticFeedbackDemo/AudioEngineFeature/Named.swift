@@ -66,16 +66,12 @@ extension Named where T == Loader<CHHapticPattern> {
         name: "ShieldTransient",
         wrapped: .init { try tryMakePattern("ShieldTransient") }
     )
-    /*
-     
-     
-     */
     
     static let advancedCases: [Self] = [
-        texturePattern        
+        texturePattern
     ]
     
-    static let allCases: [ Self ] = [
+    static let basicCases: [ Self ] = [
         collisionPatternSmall,
         collisionPatternLarge,
         collisionPatternShield,
@@ -85,15 +81,4 @@ extension Named where T == Loader<CHHapticPattern> {
         implodePattern,
         shieldTransientPattern,
     ]
-
-    //    static let collisionPatternSmall = Self { try tryMakePattern("CollisionSmall") }
-    //    static let collisionPatternLarge = Self { try tryMakePattern("CollisionLarge") }
-    //    static let collisionPatternShield = Self { try tryMakePattern("CollisionShield") }
-    //    static let texturePattern = Self { try tryMakePattern("Texture") }
-    //    static let spawnPattern = Self { try tryMakePattern("Spawn") }
-    //    static let growPattern = Self { try tryMakePattern("Grow") }
-    //    static let shieldContinuousPattern = Self { try tryMakePattern("ShieldContinuous") }
-    //    static let implodePattern = Self { try tryMakePattern("Implode") }
-    //    static let shieldTransientPattern = Self { try tryMakePattern("ShieldTransient") } // not in use by the apple demo
-
 }

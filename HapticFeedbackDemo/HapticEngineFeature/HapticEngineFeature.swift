@@ -243,6 +243,7 @@ struct HapticButtonView: View {
                             )) {
                                 HapticEventDetailView(store: $0)
                             }.onDelete {
+                                // TODO: - do we need this?
                                 print("-=- finally.. \($0)")
                             }
                         }

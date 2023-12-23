@@ -16,22 +16,12 @@ extension HapticEngineClient where T == HapticPattern {
             // NOTE: - this is not expected to fail.
             let engine = try CHHapticEngine()
             engine.resetHandler = resetHandler
-            engine.stoppedHandler = {
-                stoppedHandler(StoppedReason($0))
-//                stoppedHandler([
-//                    StoppedReason(chReason: $0).rawValue,
-//                    "\n\treasonCode: \($0.rawValue)"
-//                ].reduce("engine.stoppedHandler: CHHapticEngine.StoppedReason.", +))
-            }
-            
+            engine.stoppedHandler = { stoppedHandler(StoppedReason($0)) }
+        
             return HapticEngine(
                 objId: ObjectIdentifier(engine),
                 start: engine.start,
-                stop: {
-                    print("-=- stopping... ")
-                    try await engine.stop()
-                    print("-=- stopping succeeded... ")
-                },
+                stop: engine.stop,
                 makePlayer: { pattern in
                     let player = try engine.makePlayer(with: pattern.toCHHapticPattern())
                     
@@ -39,6 +29,21 @@ extension HapticEngineClient where T == HapticPattern {
                         start: player.start(atTime:),
                         _sendParameters: { params, delay in
                             try player.sendParameters(params.map(\.toCHHapticDynamicParameter), atTime: delay)
+                        }
+                    )
+                }, 
+                makeAdvancedPlayer: { pattern in
+                    let player = try engine.makeAdvancedPlayer(with: pattern.toCHHapticPattern())
+                    
+                    return .init(
+                        _base: HapticPatternPlayer(
+                            start: player.start(atTime:),
+                            _sendParameters: { params, delay in
+                                try player.sendParameters(params.map(\.toCHHapticDynamicParameter), atTime: delay)
+                            }
+                        ),
+                        loopEnabled: {
+                            player.loopEnabled = $0
                         }
                     )
                 }
@@ -54,16 +59,7 @@ extension HapticEngineClient where T == CHHapticPattern {
         _makeHapticEngine: { resetHandler, stoppedHandler in
             let engine = try CHHapticEngine()
             engine.resetHandler = resetHandler
-
-            
-            engine.stoppedHandler = {
-                stoppedHandler(StoppedReason($0))
-//                stoppedHandler([
-//                    StoppedReason(chReason: $0).rawValue,
-//                    "\n\treasonCode: \($0.rawValue)"
-//                ].reduce("engine.stoppedHandler: CHHapticEngine.StoppedReason.", +))
-            }
-//            engine.stop()
+            engine.stoppedHandler = { stoppedHandler(StoppedReason($0)) }
             
             return HapticEngine(
                 objId: ObjectIdentifier(engine),
@@ -79,13 +75,21 @@ extension HapticEngineClient where T == CHHapticPattern {
                             try player.sendParameters(params.map(\.toCHHapticDynamicParameter), atTime: delay)
                         }
                     )
-
+                },                 
+                makeAdvancedPlayer: { pattern in
+                    let player = try engine.makeAdvancedPlayer(with: pattern)
                     
-//                        .init(
-//                            start: { _ in },
-//                            _sendParameters: { _, _ in }
-//                        )
-                    
+                    return .init(
+                        _base: HapticPatternPlayer(
+                            start: player.start(atTime:),
+                            _sendParameters: { params, delay in
+                                try player.sendParameters(params.map(\.toCHHapticDynamicParameter), atTime: delay)
+                            }
+                        ),
+                        loopEnabled: {
+                            player.loopEnabled = $0
+                        }
+                    )
                 }
             )
         }

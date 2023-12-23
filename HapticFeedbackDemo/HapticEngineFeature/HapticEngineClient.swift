@@ -51,34 +51,18 @@ extension HapticEngineClient where T == HapticPattern {
                 makePlayer: { _ in .init(
                     start: { _ in },
                     _sendParameters: { _, _ in }
+                )},
+                makeAdvancedPlayer: { _ in .init(
+                    _base: .init(
+                        start: { _ in },
+                        _sendParameters: { _, _ in }
+                    ),
+                    loopEnabled: { _ in }
                 )}
             )
         }
     )
 }
-//extension HapticEngineClient where T == CHHapticPattern {
-//    static let mock = HapticEngineClient(
-//        supportsHaptics: { true },
-//        _makeHapticEngine: { resetHandler, stoppedHandler in
-//            var didCallStart = false
-//            return HapticEngine(
-//                objId: ObjectIdentifier(NSObject()),
-//                start: {
-//                    if didCallStart {
-//                        resetHandler()
-//                    } else {
-//                        didCallStart = true
-//                    }
-//                },
-//                stop: { stoppedHandler(.engineDestroyed) },
-//                makePlayer: { _ in .init(
-//                    start: { _ in },
-//                    _sendParameters: { _, _ in }
-//                )}
-//            )
-//        }
-//    )
-//}
 
 // CHHapticPattern
 struct HapticPattern: Equatable, Encodable {
@@ -110,7 +94,8 @@ struct HapticEngine<T>: Hashable {
     let start: () async throws -> Void
     let stop: () async throws -> Void
     let makePlayer: (T) throws -> HapticPatternPlayer
-        
+    let makeAdvancedPlayer: (T) throws -> AdvancedHapticPatternPlayer
+
     static func == (lhs: HapticEngine, rhs: HapticEngine) -> Bool {
         lhs.objId == rhs.objId
     }
@@ -121,7 +106,7 @@ struct HapticEngine<T>: Hashable {
 }
 
 /*
- this type of init is not capable of producing audio events.
+ NOTE: this type of init is not capable of producing audio events.
  */
 // CHHapticEvent
 struct HapticEvent: Hashable, Encodable {
@@ -227,5 +212,21 @@ struct HapticPatternPlayer {
         atTime time: TimeInterval
     ) throws {
         try _sendParameters(parameters, time)
+    }
+}
+
+struct AdvancedHapticPatternPlayer {    
+    private let base: HapticPatternPlayer
+    let loopEnabled: (Bool) -> Void
+
+    internal init(_base: HapticPatternPlayer, loopEnabled: @escaping (Bool) -> Void) {
+        self.base = _base
+        self.loopEnabled = loopEnabled
+    }
+    
+    subscript<T>(
+        dynamicMember keyPath: KeyPath<HapticPatternPlayer, T>
+    ) -> T {
+        base[keyPath: keyPath]
     }
 }
