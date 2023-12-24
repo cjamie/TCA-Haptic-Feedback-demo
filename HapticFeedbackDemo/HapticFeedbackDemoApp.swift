@@ -12,6 +12,7 @@ import ComposableArchitecture
 struct HapticFeedbackDemoApp: App {
     var body: some Scene {
         WindowGroup {
+            // TODO: - destination based navigation.
 //            HapticMenuApp(store: Store(
 //                initialState: HapticsFeature.State(),
 //                reducer: {

@@ -14,8 +14,6 @@ import ComposableArchitecture
 
 struct PresetAudioEngineFeature<P: Equatable>: Reducer {
     struct State: Equatable {
-
-        // TODO: - these can be playyers instead of patterns.
         var basicPatterns: IdentifiedArrayOf<Named<P>> = []
         var advancedPatterns: IdentifiedArrayOf<Named<P>> = []
 

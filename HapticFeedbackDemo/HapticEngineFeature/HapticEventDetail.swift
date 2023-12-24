@@ -8,7 +8,7 @@
 import SwiftUI
 import ComposableArchitecture
 
-// TODO: - this is specifically for haptics.. will create another for audio.
+// NOTE: - this is specifically for haptics, not audio
 struct EditHapticEventFeature: Reducer {
     struct State: Equatable, Identifiable {
         @BindingState

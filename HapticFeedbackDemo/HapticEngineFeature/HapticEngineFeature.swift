@@ -53,6 +53,7 @@ struct HapticEngineFeature: Reducer {
         case onDeleteEvent(IndexSet)
         case onAddEventButtonTapped(ScrollViewProxy)
         case scrollTo(ScrollViewProxy, UUID)
+        case onMove(IndexSet, Int)
 
         case hapticEvent(UUID, EditHapticEventFeature.Action)
         case binding(_ action: BindingAction<State>)
@@ -96,6 +97,12 @@ struct HapticEngineFeature: Reducer {
             case .scrollTo(let proxy, let id):
                 proxy.scrollTo(id, anchor: .top)
 
+                return .none
+            case let .onMove(offsets, destination):
+                state.hapticEvents.move(
+                    fromOffsets: offsets,
+                    toOffset: destination
+                )
                 return .none
             case .onToggleEngineStateButtonTapped:
                 if !state.isEngineInBadState {
@@ -217,6 +224,7 @@ struct HapticEngineFeature: Reducer {
     ) -> Effect<HapticEngineFeature.Action> {
         .run { send in
             do {
+                // TODO: - port over EngineState into this reducer, to represent state of the engine. 
                 let engine = try engine ?? client.makeHapticEngine(
                     resetHandler: {
                         print("-=- reset handler called.. ")
@@ -243,10 +251,6 @@ struct HapticButtonView: View {
         WithViewStore(store, observe: { $0 }) { viewStore in
             VStack(spacing: .zero) {
                 Text(viewStore.generalTitle ?? "Haptic Pattern detail")
-                
-                
-                
-                
                 
                 ScrollViewReader { proxy in
                     HStack {
@@ -277,6 +281,9 @@ struct HapticButtonView: View {
                             HapticEventDetailView(store: $0)
                         }.onDelete {
                             viewStore.send(.onDeleteEvent($0))
+                        }
+                        .onMove { indices, newOffset in
+                            viewStore.send(.onMove(indices, newOffset))
                         }
                     }
                 }
