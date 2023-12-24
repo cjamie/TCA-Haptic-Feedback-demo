@@ -152,11 +152,11 @@ struct HapticEventDetailView: View {
                         .font(.system(size: 16, weight: .bold))
                 }
                 
-                Button(action: {
-                    viewStore.send(.onRandomizeButtonTapped, animation: .bouncy)
-                }) {
-                    Text("Randomize")
-                }
+//                Button(action: {
+//                    viewStore.send(.onRandomizeButtonTapped, animation: .bouncy)
+//                }) {
+//                    Text("Randomize")
+//                }
             }
             .onAppear { viewStore.send(.onAppear) }
         }

@@ -67,7 +67,7 @@ struct PresetAudioEngineFeature<P: Equatable>: Reducer {
 
     enum Action {
         case onAppear
-        case onTryBasicTapped(Named<P>.ID)
+        case onTryBasicTapped(Named<P>)
         case onEngineCreationResult(Result<HapticEngine<P>, Error>)
         case onEngineReset(HapticEngine<P>)
         case onEngineStopped(HapticEngine<P>, StoppedReason)
@@ -100,10 +100,7 @@ struct PresetAudioEngineFeature<P: Equatable>: Reducer {
                 do {
                     state.basicPatterns = try IdentifiedArray(
                         uniqueElements: namedLoaders.map {
-                            try Named(
-                                name: $0.name,
-                                wrapped: $0.wrapped()
-                            )
+                            try Named(name: $0.name, wrapped: $0.wrapped())
                         },
                         id: \.name
                     )
@@ -135,7 +132,8 @@ struct PresetAudioEngineFeature<P: Equatable>: Reducer {
                 state.engineState = .uninitialized
                 state.errorString = error.localizedDescription
 
-            case .onTryBasicTapped(let id):
+            case .onTryBasicTapped(let basicPattern):
+                let id = basicPattern.id
                 return .concatenate(
                     ensureEngineIsInGoodState(
                         client: client,
@@ -254,7 +252,7 @@ struct PresetAudioEngineView<T: Equatable>: View {
    
                 ForEach(viewStore.basicPatterns) { namedPattern in
                     Button(action: {
-                        viewStore.send(.onTryBasicTapped(namedPattern.id))
+                        viewStore.send(.onTryBasicTapped(namedPattern))
                     }, label: {
                         Text(namedPattern.name)
                     })
@@ -263,16 +261,14 @@ struct PresetAudioEngineView<T: Equatable>: View {
                 // TODO: - finish this...
                 ForEach(viewStore.advancedPatterns) { namedPattern in
                     Button(action: {
-                        viewStore.send(.onTryBasicTapped(namedPattern.id))
+                        viewStore.send(.onTryBasicTapped(namedPattern))
                     }, label: {
                         Text(namedPattern.name)
                     })
                 }
-
-                Text("audio engine viw")
-                    .onAppear {
-                        viewStore.send(.onAppear)
-                    }
+            }
+            .onAppear {
+                viewStore.send(.onAppear)
             }
             .onChange(of: scenePhase) { oldPhase, newPhase in
                 viewStore.send(.onScenePhaseChanged(oldPhase, newPhase))
