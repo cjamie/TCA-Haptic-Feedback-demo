@@ -26,6 +26,7 @@ struct EditHapticEventFeature: Reducer {
         case onRandomizeButtonTapped
         case onAddEventParameterButtonTapped(ScrollViewProxy)
         case scrollTo(ScrollViewProxy, UUID)
+        case onMove(IndexSet, Int)
     }
     
     @Dependency(\.continuousClock) var clock
@@ -71,6 +72,12 @@ struct EditHapticEventFeature: Reducer {
             case .scrollTo(let proxy, let id):
                 proxy.scrollTo(id, anchor: .top)
 
+                return .none
+            case let .onMove(offsets, destination):
+                state.event.parameters.move(
+                    fromOffsets: offsets,
+                    toOffset: destination
+                )
                 return .none
             }
         }
@@ -123,6 +130,9 @@ struct HapticEventDetailView: View {
                                 }.id(param.wrappedValue.id)
                             }
                             .onDelete { viewStore.send(.onDelete($0)) }
+                            .onMove { indices, newOffset in
+                                viewStore.send(.onMove(indices, newOffset))
+                            }
                         }
                         .frame(height: 300)
                     }

@@ -19,7 +19,7 @@ struct HapticEngineFeature: Reducer {
         var copyColor: Color = .blue
         
         @BindingState
-        var hapticPattern = try! HapticPattern(
+        var hapticPattern = HapticPattern(
             events: vanillaHapticEventGen
                 .array(of: .always(2)).run(),
             parameters: []
@@ -54,6 +54,7 @@ struct HapticEngineFeature: Reducer {
         case resetCopyImage
         case onToggleEngineStateButtonTapped
         case onEngineFailure(Error)
+        case onDeleteEvent(IndexSet)
         
         case hapticEvent(UUID, EditHapticEventFeature.Action)
         case binding(_ action: BindingAction<State>)
@@ -92,7 +93,6 @@ struct HapticEngineFeature: Reducer {
                                 .unwrapOrThrow()
                                 .stop()
                             
-                            
                         } catch {
                             await send(.onEngineFailure(error))
                         }
@@ -101,7 +101,10 @@ struct HapticEngineFeature: Reducer {
                 } else {
                     return startEngineEffect(engine: state.engine)
                 }
+            case .onDeleteEvent(let indexSet):
+                state.hapticEvents.remove(atOffsets: indexSet)
                 
+                return .none
                 
             case .onEngineCreationResult(let engineResult):
 
@@ -243,8 +246,7 @@ struct HapticButtonView: View {
                             )) {
                                 HapticEventDetailView(store: $0)
                             }.onDelete {
-                                // TODO: - do we need this?
-                                print("-=- finally.. \($0)")
+                                viewStore.send(.onDeleteEvent($0))
                             }
                         }
                     }
