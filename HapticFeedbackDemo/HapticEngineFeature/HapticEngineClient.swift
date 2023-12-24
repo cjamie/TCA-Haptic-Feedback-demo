@@ -74,7 +74,7 @@ struct HapticPattern: Equatable, Encodable {
         self.parameters = parameters
     }
     
-    var dynamicMock: Self {
+    static var dynamicMock: Self {
         hapticPatternGen.run()
     }
 }

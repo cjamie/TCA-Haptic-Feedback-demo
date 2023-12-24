@@ -22,12 +22,17 @@ struct HapticFeedbackDemoApp: App {
 //            EmptyView()
             
             NavigationStack {
-                
                 HapticButtonView(
                     store: Store(
-                        initialState: HapticEngineFeature.State(),
+                        initialState: HapticEngineFeature.State(
+                            hapticPattern: hapticPatternGen.run()
+                        ),
                         reducer: {
-                            HapticEngineFeature(client: .liveHaptic, copyClient: .live)
+                            HapticEngineFeature(
+                                client: .liveHaptic,
+                                copyClient: .live, 
+                                hapticEventGen: vanillaHapticEventGen.run
+                            )
                                 ._printChanges()
                         }
                     )

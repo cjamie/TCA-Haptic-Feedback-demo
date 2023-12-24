@@ -30,7 +30,9 @@ struct EditHapticEventFeature: Reducer {
     }
     
     @Dependency(\.continuousClock) var clock
-
+    let hapticEventGen: () -> HapticEvent
+    let paramGen: () -> HapticEvent.EventParameter
+    
     var body: some ReducerOf<Self> {
         BindingReducer()
         Reduce { state, action in
@@ -46,7 +48,7 @@ struct EditHapticEventFeature: Reducer {
                 return .none
                 
             case .onRandomizeButtonTapped:
-                let new = vanillaHapticEventGen.run()
+                let new = hapticEventGen()
 
                 var copy = state.event
                 copy.eventType = new.eventType
@@ -54,7 +56,7 @@ struct EditHapticEventFeature: Reducer {
                 copy.duration = new.duration
 
                 for indice in copy.parameters.indices {
-                    copy.parameters[indice].change(to: hapticEventParam.run())
+                    copy.parameters[indice].change(to: paramGen())
                 }
 
                 state.event = copy
@@ -62,8 +64,7 @@ struct EditHapticEventFeature: Reducer {
                 return .none
                 
             case .onAddEventParameterButtonTapped(let proxy):
-                // TODO: injection
-                let new = hapticEventParam.run()
+                let new = paramGen()
                 state.event.parameters.append(new)
                 return .run { [id = new.id, proxy] send in
                     try await clock.sleep(for: .milliseconds(100))
@@ -172,7 +173,10 @@ struct HapticEventDetailView: View {
                     event: .dynamicMock
                 ),
                 reducer: {
-                    EditHapticEventFeature()
+                    EditHapticEventFeature(
+                        hapticEventGen: vanillaHapticEventGen.run,
+                        paramGen: hapticEventParam.run
+                    )
                         ._printChanges()
                 }
             )

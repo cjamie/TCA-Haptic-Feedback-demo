@@ -19,7 +19,7 @@ struct HapticEngineFeature: Reducer {
         var copyColor: Color = .blue
                 
         @BindingState
-        var hapticPattern = hapticPatternGen.run()
+        var hapticPattern: HapticPattern
         
         @BindingState
         var prettyJSONFormattedDescription: String?
@@ -67,6 +67,8 @@ struct HapticEngineFeature: Reducer {
         $0.outputFormatting = .prettyPrinted
     }
     
+    let hapticEventGen: () -> HapticEvent
+    
     @Dependency(\.continuousClock) var clock
     var body: some ReducerOf<Self> {
         BindingReducer()
@@ -81,7 +83,7 @@ struct HapticEngineFeature: Reducer {
                 return .none
             case .onAddEventButtonTapped(let proxy):
                 
-                let new = vanillaHapticEventGen.run()
+                let new = hapticEventGen()
                 state.hapticPattern.events.append(new)
                 
                 return .run { [id = new.id] send in
@@ -135,9 +137,9 @@ struct HapticEngineFeature: Reducer {
                 
                 for indice in state.hapticPattern.events.indices {
                     state.hapticPattern.events[indice]
-                        .change(to: vanillaHapticEventGen.run())
+                        .change(to: hapticEventGen())
                 }
-                
+                                
                 return .none
             case .cancelPrettyJSONButtonTapped:
                 state.prettyJSONFormattedDescription = nil
@@ -201,7 +203,10 @@ struct HapticEngineFeature: Reducer {
             \.hapticEvents,
              action: /HapticEngineFeature.Action.hapticEvent,
              element: {
-                 EditHapticEventFeature()
+                 EditHapticEventFeature(
+                    hapticEventGen: vanillaHapticEventGen.run,
+                    paramGen: hapticEventParam.run
+                 )
              }
         )
     }
@@ -346,9 +351,15 @@ struct HapticButtonView: View {
 #Preview {
     HapticButtonView(
         store: Store(
-            initialState: HapticEngineFeature.State(),
+            initialState: HapticEngineFeature.State(
+                hapticPattern: hapticPatternGen.run()
+            ),
             reducer: {
-                HapticEngineFeature(client: .mock, copyClient: .mock)
+                HapticEngineFeature(
+                    client: .mock,
+                    copyClient: .mock, 
+                    hapticEventGen: vanillaHapticEventGen.run
+                )
                     ._printChanges()
             }
         )
