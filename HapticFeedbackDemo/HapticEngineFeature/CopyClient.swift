@@ -7,6 +7,7 @@
 
 import UIKit
 
+// TODO: - use sharekit instead
 struct CopyClient {
     let copy: (String) -> Void
     
