@@ -13,11 +13,6 @@ struct Named<T> {
 }
 
 extension Named: Equatable where T: Equatable {}
-//extension Named: Equatable where T == Loader<CHHapticPattern> {
-//    static func == (lhs: Named<T>, rhs: Named<T>) -> Bool {
-//        lhs.name == rhs.name
-//    }
-//}
 
 extension Named: Identifiable {
     var id: String {
@@ -27,7 +22,6 @@ extension Named: Identifiable {
 
 // Named<Loader<CHHapticPattern>>
 extension Named where T == Loader<CHHapticPattern> {
-
     static let collisionPatternSmall = Self(
         name: "CollisionSmall",
         wrapped: .init { try tryMakePattern("CollisionSmall") }

@@ -215,7 +215,7 @@ struct HapticPatternPlayer {
     }
 }
 
-struct AdvancedHapticPatternPlayer {    
+struct AdvancedHapticPatternPlayer {
     private let base: HapticPatternPlayer
     let loopEnabled: (Bool) -> Void
 

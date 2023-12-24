@@ -13,7 +13,6 @@ import ComposableArchitecture
 // TODO: - we can have more use-case specific errors for more nuanced error handling
 struct PresetAudioEngineFeature<P: Equatable>: Reducer {
     struct State: Equatable {
-        
         enum EngineState: Equatable {
             enum State: Equatable {
                 case created
@@ -28,6 +27,18 @@ struct PresetAudioEngineFeature<P: Equatable>: Reducer {
 
         // TODO: - these can be playyers instead of patterns.
         var basicPatterns: IdentifiedArrayOf<Named<P>> = []
+        var advancedPatterns: IdentifiedArrayOf<Named<P>> = []
+
+        // PatternPlayer caches
+        var basicPatternPlayers: IdentifiedArrayOf<
+            Identified<String, HapticPatternPlayer>
+        > = []
+        
+        var advancedPatternPlayers: IdentifiedArrayOf<
+            Identified<String, AdvancedHapticPatternPlayer>
+        > = []
+        
+        
         var errorString: String?
         var engineState: EngineState = .uninitialized
         
@@ -39,14 +50,30 @@ struct PresetAudioEngineFeature<P: Equatable>: Reducer {
                 return nil
             }
         }
+        
+        // MARK: - Equatable
+        
+        static func ==(
+            lhs: PresetAudioEngineFeature<P>.State,
+            rhs: PresetAudioEngineFeature<P>.State
+        ) -> Bool {
+            [
+                lhs.errorString == rhs.errorString,
+                lhs.engine == rhs.engine,
+                lhs.engineState == rhs.engineState,
+            ].allSatisfy { $0 }
+        }
     }
 
     enum Action {
         case onAppear
-        case onTryTapped(Named<P>.ID)
+        case onTryBasicTapped(Named<P>.ID)
         case onEngineCreationResult(Result<HapticEngine<P>, Error>)
         case onEngineReset(HapticEngine<P>)
         case onEngineStopped(HapticEngine<P>, StoppedReason)
+        case onBasicPlayersCreationResult(
+            Result<IdentifiedArrayOf<Identified<String, HapticPatternPlayer>>, Error>
+        )
 
         case onScenePhaseChanged(ScenePhase, ScenePhase)
     }
@@ -83,33 +110,49 @@ struct PresetAudioEngineFeature<P: Equatable>: Reducer {
                 } catch {
                     state.errorString = error.localizedDescription
                 }
-                                
+                
                 return createEngine(client: client)
+
+            case .onBasicPlayersCreationResult(.success(let basicPlayers)):
+                state.basicPatternPlayers = basicPlayers
+                
+                return .none
+
+            case .onBasicPlayersCreationResult(.failure(let error)):
+                state.errorString = error.localizedDescription
+                return .none
+
             case .onEngineCreationResult(.success(let engine)):
                 state.engineState = .initialized(engine, .created)
-                return startEngine(engine)
+
+                let base = startEngine(engine)
+
+                return state.basicPatternPlayers.isEmpty 
+                ? .concatenate(base, createBasicHapticPlayers(state: state))
+                : base
 
             case .onEngineCreationResult(.failure(let error)):
                 state.engineState = .uninitialized
                 state.errorString = error.localizedDescription
 
-            case .onTryTapped(let id):
+            case .onTryBasicTapped(let id):
                 return .concatenate(
                     ensureEngineIsInGoodState(
                         client: client,
                         engineState: state.engineState
                     ),
                     .run { [state] send in
-                        let pattern = try state.basicPatterns[id: id].unwrapOrThrow().wrapped
-                        let newPlayer = try state.engine.unwrapOrThrow().makePlayer(pattern)
+                        let player = try state.basicPatternPlayers[id: id]?.value
+                            ?? state.engine.unwrapOrThrow().makePlayer(
+                                state.basicPatterns[id: id].unwrapOrThrow().wrapped
+                            )
+                                                
                         let params: [HapticDynamicParameter] = [
                             .init(parameterId: .hapticIntensityControl, value: 1, relativeTime: 0),
                             .init(parameterId: .audioVolumeControl, value: 1, relativeTime: 0)
                         ]
-                        try newPlayer.sendParameters(parameters: params, atTime: HapticTimeImmediate)
-                        
-                        print("-=- pattern: \(pattern) \(params)")
-                        try newPlayer.start(HapticTimeImmediate)
+                        try player.sendParameters(parameters: params, atTime: HapticTimeImmediate)
+                        try player.start(HapticTimeImmediate)
                     }
                 )
             case .onEngineReset(let engine):
@@ -174,6 +217,27 @@ struct PresetAudioEngineFeature<P: Equatable>: Reducer {
             }
         }
     }
+    
+    private func createBasicHapticPlayers(state: State) -> Effect<Action> {
+        .run(priority: .medium) { send in
+            do {
+                let basicPlayers = try state.basicPatterns.map {
+                    Identified(
+                        try state.engine.unwrapOrThrow(NSError(domain: "no engine present", code: -1)).makePlayer($0.wrapped),
+                        id: $0.id
+                    )
+                }
+                
+                await send(.onBasicPlayersCreationResult(
+                    .success(.init(uncheckedUniqueElements: basicPlayers))
+                ))
+            } catch {
+                await send(.onBasicPlayersCreationResult(
+                    .failure(error)
+                ))
+            }
+        }
+    }
 }
 
 struct PresetAudioEngineView<T: Equatable>: View {
@@ -190,12 +254,21 @@ struct PresetAudioEngineView<T: Equatable>: View {
    
                 ForEach(viewStore.basicPatterns) { namedPattern in
                     Button(action: {
-                        viewStore.send(.onTryTapped(namedPattern.id))
+                        viewStore.send(.onTryBasicTapped(namedPattern.id))
                     }, label: {
                         Text(namedPattern.name)
                     })
                 }
-                                
+                
+                // TODO: - finish this...
+                ForEach(viewStore.advancedPatterns) { namedPattern in
+                    Button(action: {
+                        viewStore.send(.onTryBasicTapped(namedPattern.id))
+                    }, label: {
+                        Text(namedPattern.name)
+                    })
+                }
+
                 Text("audio engine viw")
                     .onAppear {
                         viewStore.send(.onAppear)
@@ -208,7 +281,6 @@ struct PresetAudioEngineView<T: Equatable>: View {
     }
 }
 
-// TODO: - repair the preset.. should not import CoreHaptics
 #Preview("Infra preview") {
     PresetAudioEngineView(
         store: Store(

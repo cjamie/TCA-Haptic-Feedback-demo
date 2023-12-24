@@ -34,31 +34,31 @@ struct HapticFeedbackDemoApp: App {
 //                )
 //            }
             
-            HapticEventDetailView(
-                store: Store(
-                    initialState: EditHapticEventFeature.State(
-                        event: .dynamicMock
-                    ),
-                    reducer: {
-                        EditHapticEventFeature()
-                            ._printChanges()
-                    }
-                )
-            )
-            .padding()
-            
-//            PresetAudioEngineView(
+//            HapticEventDetailView(
 //                store: Store(
-//                    initialState: PresetAudioEngineFeature.State(),
+//                    initialState: EditHapticEventFeature.State(
+//                        event: .dynamicMock
+//                    ),
 //                    reducer: {
-//                        PresetAudioEngineFeature(
-//                            namedLoaders: Named.basicCases,
-//                            client: .liveCHHapticPattern
-//                        )
+//                        EditHapticEventFeature()
 //                            ._printChanges()
 //                    }
 //                )
 //            )
+//            .padding()
+            
+            PresetAudioEngineView(
+                store: Store(
+                    initialState: PresetAudioEngineFeature.State(),
+                    reducer: {
+                        PresetAudioEngineFeature(
+                            namedLoaders: Named.basicCases,
+                            client: .liveCHHapticPattern
+                        )
+                            ._printChanges()
+                    }
+                )
+            )
         }
     }
 }

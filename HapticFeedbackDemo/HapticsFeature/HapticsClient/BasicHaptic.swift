@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct BasicHaptic: Hashable, CaseIterable {
+struct BasicHaptic: Hashable {
     let rawValue: String
     let category: Category
         
@@ -16,6 +16,10 @@ struct BasicHaptic: Hashable, CaseIterable {
         case feedback(FeedbackStyle, intensity: CGFloat? = nil)
         case notificationFeedback(FeedbackType)
         case selectionFeedback
+    }
+    
+    var asNamed: Named<Category> {
+        .init(name: rawValue, wrapped: category)
     }
         
     static let light = BasicHaptic(
@@ -63,17 +67,15 @@ struct BasicHaptic: Hashable, CaseIterable {
         category: .selectionFeedback
     )
     
-    static var allCases: [BasicHaptic] {
-        [
-            light,
-            medium,
-            heavy,
-            soft,
-            rigid,
-            success,
-            warning,
-            error,
-            selectionChanged
-        ]
-    }
+    static let allCases = [
+        light,
+        medium,
+        heavy,
+        soft,
+        rigid,
+        success,
+        warning,
+        error,
+        selectionChanged
+    ]    
 }
