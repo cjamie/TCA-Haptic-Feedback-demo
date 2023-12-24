@@ -17,13 +17,9 @@ struct HapticEngineFeature: Reducer {
         
         var copyImage: String = "square.on.square"
         var copyColor: Color = .blue
-        
+                
         @BindingState
-        var hapticPattern = HapticPattern(
-            events: vanillaHapticEventGen
-                .array(of: .always(2)).run(),
-            parameters: []
-        )
+        var hapticPattern = hapticPatternGen.run()
         
         @BindingState
         var prettyJSONFormattedDescription: String?
@@ -55,7 +51,9 @@ struct HapticEngineFeature: Reducer {
         case onToggleEngineStateButtonTapped
         case onEngineFailure(Error)
         case onDeleteEvent(IndexSet)
-        
+        case onAddEventButtonTapped(ScrollViewProxy)
+        case scrollTo(ScrollViewProxy, UUID)
+
         case hapticEvent(UUID, EditHapticEventFeature.Action)
         case binding(_ action: BindingAction<State>)
         
@@ -76,14 +74,29 @@ struct HapticEngineFeature: Reducer {
             switch action {
             case .onAppear:
                 return startEngineEffect(engine: state.engine)
-                //                    .merge(with: .send(.onDisplayButtonTapped))
             case .hapticEvent:
                 return .none
             case .onEngineFailure(let error):
                 state.engineFailureDescription = error.localizedDescription
                 return .none
+            case .onAddEventButtonTapped(let proxy):
+                
+                let new = vanillaHapticEventGen.run()
+                state.hapticPattern.events.append(new)
+                
+                return .run { [id = new.id] send in
+                    try await clock.sleep(for: .milliseconds(100))
+                    await send(
+                        .scrollTo(proxy, id),
+                        animation: .spring(.snappy, blendDuration: 0.3)
+                    )
+                }
+            case .scrollTo(let proxy, let id):
+                proxy.scrollTo(id, anchor: .top)
+
+                return .none
             case .onToggleEngineStateButtonTapped:
-                if state.isEngineInBadState {
+                if !state.isEngineInBadState {
                     state.engineFailureDescription = nil
                     
                     return .run { [state] send in
@@ -97,7 +110,6 @@ struct HapticEngineFeature: Reducer {
                             await send(.onEngineFailure(error))
                         }
                     }
-                    
                 } else {
                     return startEngineEffect(engine: state.engine)
                 }
@@ -224,60 +236,72 @@ struct HapticButtonView: View {
     
     var body: some View {
         WithViewStore(store, observe: { $0 }) { viewStore in
-            VStack {
+            VStack(spacing: .zero) {
                 Text(viewStore.generalTitle ?? "Haptic Pattern detail")
-                Button(action: {
-                    viewStore.send(.onToggleEngineStateButtonTapped)
-                }) {
-                    Text(viewStore.isEngineInBadState ? "Restart Engine" : "Stop Engine")
-                        .font(.headline)
-                        .padding()
-                        .cornerRadius(10)
-                }
                 
-                // TODO: - add an add button here...
-                if !viewStore.isEngineInBadState {
-                    
-                    ScrollViewReader { proxy in
-                        List {
-                            ForEachStore(store.scope(
-                                state: \.hapticEvents,
-                                action: HapticEngineFeature.Action.hapticEvent
-                            )) {
-                                HapticEventDetailView(store: $0)
-                            }.onDelete {
-                                viewStore.send(.onDeleteEvent($0))
-                            }
-                        }
-                    }
-                    
-                    Button(action: {
-                        viewStore.send(.onDisplayButtonTapped)
-                    }) {
-                        Text("Show pretty JSON")
-                            .font(.headline)
-                            .padding()
-                            .cornerRadius(10)
-                    }
-                    
+                
+                
+                
+                
+                ScrollViewReader { proxy in
                     HStack {
                         Button(action: {
-                            viewStore.send(.onDemoButtonTapped)
+                            viewStore.send(.onToggleEngineStateButtonTapped)
                         }) {
-                            Text("Demo Haptic")
+                            Text(viewStore.isEngineInBadState ? "Restart Engine" : "Stop Engine")
                                 .font(.headline)
                                 .padding()
                                 .cornerRadius(10)
                         }
                         
                         Button(action: {
-                            viewStore.send(.onRandomizeButtonTapped)
-                        }) {
-                            Text("Randomize")
-                                .font(.headline)
-                                .padding()
-                                .cornerRadius(10)
+                            viewStore.send(.onAddEventButtonTapped(proxy))
+                        }, label: {
+                            HStack(spacing: .zero) {
+                                Image(systemName: "plus")
+                                Text("Event")
+                            }
+                        })
+                    }
+
+                    List {
+                        ForEachStore(store.scope(
+                            state: \.hapticEvents,
+                            action: HapticEngineFeature.Action.hapticEvent
+                        )) {
+                            HapticEventDetailView(store: $0)
+                        }.onDelete {
+                            viewStore.send(.onDeleteEvent($0))
                         }
+                    }
+                }
+                
+                Button(action: {
+                    viewStore.send(.onDisplayButtonTapped)
+                }) {
+                    Text("Show pretty JSON")
+                        .font(.headline)
+                        .padding()
+                        .cornerRadius(10)
+                }
+                
+                HStack {
+                    Button(action: {
+                        viewStore.send(.onDemoButtonTapped)
+                    }) {
+                        Text("Demo Haptic")
+                            .font(.headline)
+                            .padding()
+                            .cornerRadius(10)
+                    }
+                    
+                    Button(action: {
+                        viewStore.send(.onRandomizeButtonTapped)
+                    }) {
+                        Text("Randomize")
+                            .font(.headline)
+                            .padding()
+                            .cornerRadius(10)
                     }
                 }
             }

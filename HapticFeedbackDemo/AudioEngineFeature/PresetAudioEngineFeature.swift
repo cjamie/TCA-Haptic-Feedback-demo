@@ -11,19 +11,9 @@ import ComposableArchitecture
 // this will be able to produce sounds.. and we need an audio generator..
 // under the hood, this is created by files, and not wave form generators.
 // TODO: - we can have more use-case specific errors for more nuanced error handling
+
 struct PresetAudioEngineFeature<P: Equatable>: Reducer {
     struct State: Equatable {
-        enum EngineState: Equatable {
-            enum State: Equatable {
-                case created
-                case started
-                case reset
-                case stopped(StoppedReason)
-            }
-            
-            case initialized(HapticEngine<P>, State)
-            case uninitialized
-        }
 
         // TODO: - these can be playyers instead of patterns.
         var basicPatterns: IdentifiedArrayOf<Named<P>> = []
@@ -40,7 +30,7 @@ struct PresetAudioEngineFeature<P: Equatable>: Reducer {
         
         
         var errorString: String?
-        var engineState: EngineState = .uninitialized
+        var engineState: EngineState<P> = .uninitialized
         
         var engine: HapticEngine<P>? {
             switch engineState {
@@ -166,7 +156,7 @@ struct PresetAudioEngineFeature<P: Equatable>: Reducer {
 
     private func ensureEngineIsInGoodState(
         client: HapticEngineClient<P>,
-        engineState: State.EngineState
+        engineState: EngineState<P>
     ) -> Effect<Action> {
         switch engineState {
         case .initialized(_, .started):

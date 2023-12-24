@@ -159,6 +159,7 @@ struct HapticEventDetailView: View {
 //                }
             }
             .onAppear { viewStore.send(.onAppear) }
+            .id(viewStore.event.id)
         }
     }
 }
