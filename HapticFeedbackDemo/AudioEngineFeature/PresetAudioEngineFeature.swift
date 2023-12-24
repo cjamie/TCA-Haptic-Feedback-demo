@@ -10,6 +10,7 @@ import ComposableArchitecture
 
 // this will be able to produce sounds.. and we need an audio generator..
 // under the hood, this is created by files, and not wave form generators.
+// TODO: - we can have more use-case specific errors for more nuanced error handling
 struct PresetAudioEngineFeature<P: Equatable>: Reducer {
     struct State: Equatable {
         
@@ -23,15 +24,6 @@ struct PresetAudioEngineFeature<P: Equatable>: Reducer {
             
             case initialized(HapticEngine<P>, State)
             case uninitialized
-            
-            var engine: HapticEngine<P>? {
-                switch self {
-                case .initialized(let engine, _):
-                    return engine
-                case .uninitialized:
-                    return nil
-                }
-            }
         }
 
         // TODO: - these can be playyers instead of patterns.
@@ -40,7 +32,12 @@ struct PresetAudioEngineFeature<P: Equatable>: Reducer {
         var engineState: EngineState = .uninitialized
         
         var engine: HapticEngine<P>? {
-            engineState.engine
+            switch engineState {
+            case .initialized(let engine, _):
+                return engine
+            case .uninitialized:
+                return nil
+            }
         }
     }
 
@@ -102,23 +99,24 @@ struct PresetAudioEngineFeature<P: Equatable>: Reducer {
                         client: client,
                         engineState: state.engineState
                     ),
-                    .run(operation: { [state] send in
+                    .run { [state] send in
                         let pattern = try state.basicPatterns[id: id].unwrapOrThrow().wrapped
                         let newPlayer = try state.engine.unwrapOrThrow().makePlayer(pattern)
-                        try newPlayer.sendParameters(parameters: [
+                        let params: [HapticDynamicParameter] = [
                             .init(parameterId: .hapticIntensityControl, value: 1, relativeTime: 0),
                             .init(parameterId: .audioVolumeControl, value: 1, relativeTime: 0)
-                        ], atTime: HapticTimeImmediate)
+                        ]
+                        try newPlayer.sendParameters(parameters: params, atTime: HapticTimeImmediate)
                         
+                        print("-=- pattern: \(pattern) \(params)")
                         try newPlayer.start(HapticTimeImmediate)
-                    })
+                    }
                 )
             case .onEngineReset(let engine):
                 state.engineState = .initialized(engine, .reset)
-                return .none
+
             case .onEngineStopped(let engine, let reason):
                 state.engineState = .initialized(engine, .stopped(reason))
-                return .none
             }
 
             return .none
@@ -145,20 +143,16 @@ struct PresetAudioEngineFeature<P: Equatable>: Reducer {
                 var cache: HapticEngine<P>?
                 
                 let engine = try client.makeHapticEngine(
-                    resetHandler: {
-                        Task { [cache] in
-                            if let cache {
-                                await send(.onEngineReset(cache))
-                            }
+                    resetHandler: { Task { [cache] in
+                        if let cache {
+                            await send(.onEngineReset(cache))
                         }
-                    },
-                    stoppedHandler: { reason in
-                        Task { [cache] in
-                            if let cache {
-                                await send(.onEngineStopped(cache, reason))
-                            }
+                    }},
+                    stoppedHandler: { reason in Task { [cache] in
+                        if let cache {
+                            await send(.onEngineStopped(cache, reason))
                         }
-                    }
+                    }}
                 )
                 
                 cache = engine

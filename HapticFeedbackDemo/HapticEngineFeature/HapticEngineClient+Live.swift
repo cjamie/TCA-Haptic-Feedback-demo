@@ -57,7 +57,7 @@ extension HapticEngineClient where T == CHHapticPattern {
     static let liveCHHapticPattern = HapticEngineClient(
         supportsHaptics: { true },
         _makeHapticEngine: { resetHandler, stoppedHandler in
-            let engine = try CHHapticEngine()
+            let engine = try CHHapticEngine(audioSession: .sharedInstance())
             engine.resetHandler = resetHandler
             engine.stoppedHandler = { stoppedHandler(StoppedReason($0)) }
             
@@ -75,7 +75,7 @@ extension HapticEngineClient where T == CHHapticPattern {
                             try player.sendParameters(params.map(\.toCHHapticDynamicParameter), atTime: delay)
                         }
                     )
-                },                 
+                },
                 makeAdvancedPlayer: { pattern in
                     let player = try engine.makeAdvancedPlayer(with: pattern)
                     
