@@ -22,57 +22,32 @@ extension Named: Identifiable {
 
 // Named<Loader<CHHapticPattern>>
 extension Named where T == Loader<CHHapticPattern> {
-    static let collisionPatternSmall = Self(
-        name: "CollisionSmall",
-        wrapped: .init { try tryMakePattern("CollisionSmall") }
-    )
-    static let collisionPatternLarge = Self(
-        name: "CollisionLarge",
-        wrapped: .init { try tryMakePattern("CollisionLarge") }
-    )
-    static let collisionPatternShield = Self(
-        name: "CollisionShield",
-        wrapped: .init { try tryMakePattern("CollisionShield") }
-    )
-    static let texturePattern = Self(
-        name: "Texture",
-        wrapped: .init { try tryMakePattern("Texture") }
-    )
-    static let spawnPattern = Self(
-        name: "Spawn",
-        wrapped: .init { try tryMakePattern("Spawn") }
-    )
-    static let growPattern = Self(
-        name: "Grow",
-        wrapped: .init { try tryMakePattern("Grow") }
-    )
-    static let shieldContinuousPattern = Self(
-        name: "ShieldContinuous",
-        wrapped: .init { try tryMakePattern("ShieldContinuous") }
-    )
-    static let implodePattern = Self(
-        name: "Implode",
-        wrapped: .init { try tryMakePattern("Implode") }
-    )
+    static let advancedCases = makeNamedLoader(advancedPatternNames)
+    static let basicCases = makeNamedLoader(basicPatternNames)
+    
+    // MARK: - Helpers
 
-    // not in use by the apple demo
-    static let shieldTransientPattern = Self(
-        name: "ShieldTransient",
-        wrapped: .init { try tryMakePattern("ShieldTransient") }
+    private static let advancedPatternNames: [ String ] = [
+        "texturePattern"
+    ]
+    
+    private static let basicPatternNames: [ String ] = [
+        "collisionPatternSmall",
+        "collisionPatternLarge",
+        "collisionPatternShield",
+        "spawnPattern",
+        "growPattern",
+        "shieldContinuousPattern",
+        "implodePattern",
+        "shieldTransientPattern",
+    ]
+}
+
+private let makeNamedLoader = map { patternName in
+    Named(
+        name: patternName,
+        wrapped: Loader<CHHapticPattern> {
+            try tryMakePattern(patternName)
+        }
     )
-    
-    static let advancedCases: [Self] = [
-        texturePattern
-    ]
-    
-    static let basicCases: [ Self ] = [
-        collisionPatternSmall,
-        collisionPatternLarge,
-        collisionPatternShield,
-        spawnPattern,
-        growPattern,
-        shieldContinuousPattern,
-        implodePattern,
-        shieldTransientPattern,
-    ]
 }
