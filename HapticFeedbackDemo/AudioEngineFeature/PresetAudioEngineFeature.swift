@@ -272,7 +272,10 @@ struct PresetAudioEngineView<T: Equatable>: View {
             reducer: {
                 PresetAudioEngineFeature(
                     namedLoaders: (3...8).map {
-                        .init(name: String($0), wrapped: .init(load: hapticPatternGen.run))
+                        .init(
+                            name: String($0),
+                            wrapped: .init(load: hapticPatternGen.run)
+                        )
                     },
                     client: .mock
                 )._printChanges()

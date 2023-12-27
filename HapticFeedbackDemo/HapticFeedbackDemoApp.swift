@@ -20,25 +20,24 @@ struct HapticFeedbackDemoApp: App {
 //                        ._printChanges()
 //                }
 //            ))
-//            EmptyView()
             
-            NavigationStack {
-                HapticButtonView(
-                    store: Store(
-                        initialState: HapticEngineFeature.State(
-                            hapticPattern: hapticPatternGen.run()
-                        ),
-                        reducer: {
-                            HapticEngineFeature(
-                                client: .liveHaptic,
-                                copyClient: .live, 
-                                hapticEventGen: vanillaHapticEventGen.run
-                            )
-                                ._printChanges()
-                        }
-                    )
-                )
-            }
+//            NavigationStack {
+//                HapticButtonView(
+//                    store: Store(
+//                        initialState: HapticEngineFeature.State(
+//                            hapticPattern: hapticPatternGen.run()
+//                        ),
+//                        reducer: {
+//                            HapticEngineFeature(
+//                                client: .liveHaptic,
+//                                copyClient: .live, 
+//                                hapticEventGen: vanillaHapticEventGen.run
+//                            )
+//                                ._printChanges()
+//                        }
+//                    )
+//                )
+//            }
             
 //            HapticEventDetailView(
 //                store: Store(
@@ -46,7 +45,10 @@ struct HapticFeedbackDemoApp: App {
 //                        event: .dynamicMock
 //                    ),
 //                    reducer: {
-//                        EditHapticEventFeature()
+//                        EditHapticEventFeature(
+//                            hapticEventGen: vanillaHapticEventGen.run,
+//                            paramGen: hapticEventParam.run
+//                        )
 //                            ._printChanges()
 //                    }
 //                )
@@ -65,6 +67,18 @@ struct HapticFeedbackDemoApp: App {
 //                    }
 //                )
 //            )
+            
+            NavigationStack {
+                MultipleDestinationsView(
+                    store: Store(
+                        initialState: MultipleDestination.State()
+                    ) {
+                        MultipleDestination()
+                            ._printChanges()
+                    }
+                )
+            }
         }
     }
 }
+

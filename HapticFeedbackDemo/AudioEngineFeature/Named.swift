@@ -22,16 +22,16 @@ extension Named: Identifiable {
 
 // Named<Loader<CHHapticPattern>>
 extension Named where T == Loader<CHHapticPattern> {
-    static let advancedCases = makeNamedLoader(advancedPatternNames)
-    static let basicCases = makeNamedLoader(basicPatternNames)
+    static let advancedCases = makeLoaders(advancedPatternNames)
+    static let basicCases = makeLoaders(basicPatternNames)
     
     // MARK: - Helpers
 
-    private static let advancedPatternNames: [ String ] = [
+    private static let advancedPatternNames = [
         "texturePattern"
     ]
     
-    private static let basicPatternNames: [ String ] = [
+    private static let basicPatternNames = [
         "collisionPatternSmall",
         "collisionPatternLarge",
         "collisionPatternShield",
@@ -43,11 +43,6 @@ extension Named where T == Loader<CHHapticPattern> {
     ]
 }
 
-private let makeNamedLoader = map { patternName in
-    Named(
-        name: patternName,
-        wrapped: Loader<CHHapticPattern> {
-            try tryMakePattern(patternName)
-        }
-    )
+private let makeLoaders = map { name in
+    Named(name: name, wrapped: Loader { try tryMakePattern(name) })
 }

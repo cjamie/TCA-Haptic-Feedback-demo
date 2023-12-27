@@ -59,6 +59,11 @@ struct HapticEngineFeature: Reducer {
         case binding(_ action: BindingAction<State>)
         
         case onFormattedDisplayDismissed
+        case delegate(Delegate)
+        
+        enum Delegate {
+            case onDisappear(HapticPattern)
+        }
     }
     
     let client: HapticEngineClient<HapticPattern>
@@ -75,6 +80,8 @@ struct HapticEngineFeature: Reducer {
         BindingReducer()
         Reduce { state, action in
             switch action {
+            case .delegate:
+                return .none
             case .onAppear:
                 return startEngineEffect(engine: state.engine)
             case .hapticEvent:
@@ -250,7 +257,7 @@ struct HapticButtonView: View {
     var body: some View {
         WithViewStore(store, observe: { $0 }) { viewStore in
             VStack(spacing: .zero) {
-                Text(viewStore.generalTitle ?? "Haptic Pattern detail")
+                Text(viewStore.generalTitle ?? "Haptic Pattern detail (\(viewStore.hapticEvents.count))")
                 
                 ScrollViewReader { proxy in
                     HStack {
@@ -318,6 +325,7 @@ struct HapticButtonView: View {
                 }
             }
             .onAppear { viewStore.send(.onAppear) }
+            .onDisappear { viewStore.send(.delegate(.onDisappear(viewStore.hapticPattern))) }
             .sheet(
                 isPresented: viewStore.binding(
                     get: { $0.prettyJSONFormattedDescription != nil },
