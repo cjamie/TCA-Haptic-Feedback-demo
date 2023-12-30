@@ -219,7 +219,7 @@ struct AdvancedHapticPatternPlayer {
     private let base: HapticPatternPlayer
     let loopEnabled: (Bool) -> Void
 
-    internal init(_base: HapticPatternPlayer, loopEnabled: @escaping (Bool) -> Void) {
+    init(_base: HapticPatternPlayer, loopEnabled: @escaping (Bool) -> Void) {
         self.base = _base
         self.loopEnabled = loopEnabled
     }

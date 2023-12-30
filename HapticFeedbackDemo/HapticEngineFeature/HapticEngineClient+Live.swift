@@ -13,7 +13,7 @@ extension HapticEngineClient where T == HapticPattern {
             CHHapticEngine.capabilitiesForHardware().supportsHaptics
         },
         _makeHapticEngine: { resetHandler, stoppedHandler in
-            // NOTE: - this is not expected to fail.
+            // NOTE: - this is not expected to fail... Apple's haptics demo force unwraps this. 
             let engine = try CHHapticEngine(audioSession: .sharedInstance())
             engine.resetHandler = resetHandler
             engine.stoppedHandler = { stoppedHandler(StoppedReason($0)) }

@@ -261,23 +261,24 @@ struct HapticButtonView: View {
                 
                 ScrollViewReader { proxy in
                     HStack {
-                        Button(action: {
-                            viewStore.send(.onToggleEngineStateButtonTapped)
-                        }) {
-                            Text(viewStore.isEngineInBadState ? "Restart Engine" : "Stop Engine")
-                                .font(.headline)
-                                .padding()
-                                .cornerRadius(10)
-                        }
-                        
-                        Button(action: {
-                            viewStore.send(.onAddEventButtonTapped(proxy))
-                        }, label: {
-                            HStack(spacing: .zero) {
-                                Image(systemName: "plus")
-                                Text("Event")
+                        Button(
+                            action: { viewStore.send(.onToggleEngineStateButtonTapped) },
+                            label: {
+                                Text(viewStore.isEngineInBadState ? "Restart Engine" : "Stop Engine")
+                                    .font(.headline)
+                                    .padding()
+                                    .cornerRadius(10)
                             }
-                        })
+                        )
+                        Button(
+                            action: { viewStore.send(.onAddEventButtonTapped(proxy)) },
+                            label: {
+                                HStack(spacing: .zero) {
+                                    Image(systemName: "plus")
+                                    Text("Event")
+                                }
+                            }
+                        )
                     }
 
                     List {
@@ -286,18 +287,15 @@ struct HapticButtonView: View {
                             action: HapticEngineFeature.Action.hapticEvent
                         )) {
                             HapticEventDetailView(store: $0)
-                        }.onDelete {
-                            viewStore.send(.onDeleteEvent($0))
                         }
+                        .onDelete { viewStore.send(.onDeleteEvent($0)) }
                         .onMove { indices, newOffset in
                             viewStore.send(.onMove(indices, newOffset))
                         }
                     }
                 }
                 
-                Button(action: {
-                    viewStore.send(.onDisplayButtonTapped)
-                }) {
+                Button(action: { viewStore.send(.onDisplayButtonTapped) }) {
                     Text("Show pretty JSON")
                         .font(.headline)
                         .padding()
@@ -305,18 +303,14 @@ struct HapticButtonView: View {
                 }
                 
                 HStack {
-                    Button(action: {
-                        viewStore.send(.onDemoButtonTapped)
-                    }) {
+                    Button(action: { viewStore.send(.onDemoButtonTapped) }) {
                         Text("Demo Haptic")
                             .font(.headline)
                             .padding()
                             .cornerRadius(10)
                     }
                     
-                    Button(action: {
-                        viewStore.send(.onRandomizeButtonTapped)
-                    }) {
+                    Button(action: { viewStore.send(.onRandomizeButtonTapped) }) {
                         Text("Randomize")
                             .font(.headline)
                             .padding()
@@ -335,8 +329,7 @@ struct HapticButtonView: View {
                     NavigationView {
                         ScrollView {
                             viewStore.prettyJSONFormattedDescription.map {
-                                Text($0)
-                                    .padding()
+                                Text($0).padding()
                             }
                         }.toolbar {
                             ToolbarItem(placement: .cancellationAction) {
@@ -346,9 +339,7 @@ struct HapticButtonView: View {
                             }
                             
                             ToolbarItem(placement: .topBarTrailing) {
-                                Button(action: {
-                                    viewStore.send(.onCopyPrettyJSONTapped)
-                                }) {
+                                Button(action: { viewStore.send(.onCopyPrettyJSONTapped) }) {
                                     Image(systemName: viewStore.copyImage)
                                         .resizable()
                                         .aspectRatio(contentMode: .fit)
@@ -382,3 +373,4 @@ struct HapticButtonView: View {
 }
 
 private let makeFrom = map(EditHapticEventFeature.State.init)
+
