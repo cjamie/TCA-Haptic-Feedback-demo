@@ -42,6 +42,9 @@
 		5FC29A732B293B9600E08C3C /* Utilities.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5FC29A722B293B9600E08C3C /* Utilities.swift */; };
 		5FCC65A32B38D0C000D6F0A7 /* EngineState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5FCC65A22B38D0C000D6F0A7 /* EngineState.swift */; };
 		5FCDB5A92B3B86EE00C0F4AE /* MultipleDestination.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5FCDB5A82B3B86EE00C0F4AE /* MultipleDestination.swift */; };
+		5FCDB5AC2B40E1E800C0F4AE /* MicrophoneFeature.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5FCDB5AB2B40E1E800C0F4AE /* MicrophoneFeature.swift */; };
+		5FCDB5AE2B40ECC900C0F4AE /* SpeechClient+Live.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5FCDB5AD2B40ECC900C0F4AE /* SpeechClient+Live.swift */; };
+		5FCDB5B02B40F55700C0F4AE /* SpeechClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5FCDB5AF2B40F55700C0F4AE /* SpeechClient.swift */; };
 		5FE18E602B290734009BD46C /* HapticFeedbackDemoApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5FE18E5F2B290734009BD46C /* HapticFeedbackDemoApp.swift */; };
 		5FE18E622B290734009BD46C /* HapticsFeature.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5FE18E612B290734009BD46C /* HapticsFeature.swift */; };
 		5FE18E642B290736009BD46C /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 5FE18E632B290736009BD46C /* Assets.xcassets */; };
@@ -84,6 +87,9 @@
 		5FC29A722B293B9600E08C3C /* Utilities.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Utilities.swift; sourceTree = "<group>"; };
 		5FCC65A22B38D0C000D6F0A7 /* EngineState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EngineState.swift; sourceTree = "<group>"; };
 		5FCDB5A82B3B86EE00C0F4AE /* MultipleDestination.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MultipleDestination.swift; sourceTree = "<group>"; };
+		5FCDB5AB2B40E1E800C0F4AE /* MicrophoneFeature.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MicrophoneFeature.swift; sourceTree = "<group>"; };
+		5FCDB5AD2B40ECC900C0F4AE /* SpeechClient+Live.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SpeechClient+Live.swift"; sourceTree = "<group>"; };
+		5FCDB5AF2B40F55700C0F4AE /* SpeechClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpeechClient.swift; sourceTree = "<group>"; };
 		5FE18E5C2B290734009BD46C /* HapticFeedbackDemo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = HapticFeedbackDemo.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		5FE18E5F2B290734009BD46C /* HapticFeedbackDemoApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HapticFeedbackDemoApp.swift; sourceTree = "<group>"; };
 		5FE18E612B290734009BD46C /* HapticsFeature.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HapticsFeature.swift; sourceTree = "<group>"; };
@@ -173,6 +179,16 @@
 			path = HapticEngineFeature;
 			sourceTree = "<group>";
 		};
+		5FCDB5AA2B40E1D300C0F4AE /* MicrophoneFeature */ = {
+			isa = PBXGroup;
+			children = (
+				5FCDB5AB2B40E1E800C0F4AE /* MicrophoneFeature.swift */,
+				5FCDB5AF2B40F55700C0F4AE /* SpeechClient.swift */,
+				5FCDB5AD2B40ECC900C0F4AE /* SpeechClient+Live.swift */,
+			);
+			path = MicrophoneFeature;
+			sourceTree = "<group>";
+		};
 		5FE18E532B290734009BD46C = {
 			isa = PBXGroup;
 			children = (
@@ -193,6 +209,7 @@
 		5FE18E5E2B290734009BD46C /* HapticFeedbackDemo */ = {
 			isa = PBXGroup;
 			children = (
+				5FCDB5AA2B40E1D300C0F4AE /* MicrophoneFeature */,
 				5F0CE2042B324A2E00C70CFC /* AudioEngineFeature */,
 				5F9A5AD62B2A6DB1007587A7 /* Gen+.swift */,
 				5F3882E22B2982F000C807B8 /* HapticEngineFeature */,
@@ -322,6 +339,7 @@
 				5FE18E622B290734009BD46C /* HapticsFeature.swift in Sources */,
 				5F3882DE2B29587600C807B8 /* BasicHaptic.swift in Sources */,
 				5F0CE2032B3240FF00C70CFC /* CopyClient.swift in Sources */,
+				5FCDB5AC2B40E1E800C0F4AE /* MicrophoneFeature.swift in Sources */,
 				5F3882D72B294E9500C807B8 /* MyFeedbackGenerator.swift in Sources */,
 				5F3882D92B2957B100C807B8 /* HapticsClient.swift in Sources */,
 				5F9A5AD02B2A5AE9007587A7 /* HapticEngineClient+Live.swift in Sources */,
@@ -330,7 +348,9 @@
 				5F9A5AD22B2A65A5007587A7 /* HapticEventDetail.swift in Sources */,
 				5FCC65A32B38D0C000D6F0A7 /* EngineState.swift in Sources */,
 				5F0CE22F2B34EA6000C70CFC /* CHHapticPattern+Presets.swift in Sources */,
+				5FCDB5AE2B40ECC900C0F4AE /* SpeechClient+Live.swift in Sources */,
 				5F3882DB2B2957CE00C807B8 /* HapticsClient+Live.swift in Sources */,
+				5FCDB5B02B40F55700C0F4AE /* SpeechClient.swift in Sources */,
 				5F3882E12B29706600C807B8 /* HapticEngineFeature.swift in Sources */,
 				5F9A5AD72B2A6DB1007587A7 /* Gen+.swift in Sources */,
 				5F0CE2312B35003000C70CFC /* Named.swift in Sources */,
@@ -471,6 +491,8 @@
 				DEVELOPMENT_TEAM = RNF778SHGZ;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "record!";
+				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "NSSpeechRecognitionUsageDescription@@@@";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -501,6 +523,8 @@
 				DEVELOPMENT_TEAM = RNF778SHGZ;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "record!";
+				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "NSSpeechRecognitionUsageDescription@@@@";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
