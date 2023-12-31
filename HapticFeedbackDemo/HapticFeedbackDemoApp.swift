@@ -68,28 +68,28 @@ struct HapticFeedbackDemoApp: App {
 //                )
 //            )
             
-//            NavigationStack {
-//                MultipleDestinationsView(
-//                    store: Store(
-//                        initialState: MultipleDestination.State()
-//                    ) {
-//                        MultipleDestination()
-//                            ._printChanges()
-//                    }
-//                )
-//            }
-            MicrophoneView(
-                store: .init(
-                    initialState: MicrophoneFeature.State(),
-                    reducer: {
-                        MicrophoneFeature(
-                            speech: .live,
-                            hapticsClient: .live
-                        )
-                        ._printChanges()
+            NavigationStack {
+                MultipleDestinationsView(
+                    store: Store(
+                        initialState: MultipleDestination.State()
+                    ) {
+                        MultipleDestination()
+                            ._printChanges()
                     }
                 )
-            )
+            }
+//            MicrophoneView(
+//                store: .init(
+//                    initialState: MicrophoneFeature.State(),
+//                    reducer: {
+//                        MicrophoneFeature(
+//                            speech: .live,
+//                            hapticsClient: .live
+//                        )
+//                        ._printChanges()
+//                    }
+//                )
+//            )
 
         }
     }

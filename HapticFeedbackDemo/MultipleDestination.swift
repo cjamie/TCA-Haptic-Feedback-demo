@@ -21,6 +21,10 @@ struct MultipleDestination: Reducer {
             case drillDownIntegrated(HapticEngineFeature.State)
             case popoverIntegrated(HapticEngineFeature.State)
             case sheetIntegrated(HapticEngineFeature.State)
+            
+            case popoverMicrophoneLive(MicrophoneFeature.State)
+            case popoverMicrophoneMock(MicrophoneFeature.State)
+
         }
         
         enum Action {
@@ -31,6 +35,10 @@ struct MultipleDestination: Reducer {
             case drillDownIntegrated(HapticEngineFeature.Action)
             case popoverIntegrated(HapticEngineFeature.Action)
             case sheetIntegrated(HapticEngineFeature.Action)
+            
+            case popoverMicrophoneLive(MicrophoneFeature.Action)
+            case popoverMicrophoneMock(MicrophoneFeature.Action)
+
         }
         
         var body: some ReducerOf<Self> {
@@ -76,6 +84,25 @@ struct MultipleDestination: Reducer {
                     hapticEventGen: vanillaHapticEventGen.run
                 )
             }
+            Scope(
+                state: /State.popoverMicrophoneLive,
+                action: /Action.popoverMicrophoneLive
+            ) {
+                MicrophoneFeature(
+                    speech: .live,
+                    hapticsClient: .live
+                )
+            }
+            
+            Scope(
+                state: /State.popoverMicrophoneMock,
+                action: /Action.popoverMicrophoneMock
+            ) {
+                MicrophoneFeature(
+                    speech: .mock,
+                    hapticsClient: .live
+                )
+            }
         }
     }
     
@@ -94,6 +121,9 @@ struct MultipleDestination: Reducer {
         case onShowIntegratedDrillDownButtonTapped
         case onShowIntegratedPopoverButtonTapped
         case onShowIntegratedSheetButtonTapped
+        
+        case onShowLiveMicrophonePopoverButtonTapped
+        case onShowMockMicrophonePopoverButtonTapped
     }
     
     var body: some ReducerOf<Self> {
@@ -112,14 +142,18 @@ struct MultipleDestination: Reducer {
             case .onShowBasicSheetButtonTapped:
                 state.destination = .sheetBasic(HapticsFeature.State())
 
-
-
             case .onShowIntegratedDrillDownButtonTapped:
                 state.destination = .drillDownIntegrated(.init(hapticPattern: state.sharedIntegratedState))
             case .onShowIntegratedPopoverButtonTapped:
                 state.destination = .popoverIntegrated(.init(hapticPattern: state.sharedIntegratedState))
             case .onShowIntegratedSheetButtonTapped:
                 state.destination = .sheetIntegrated(.init(hapticPattern: state.sharedIntegratedState))
+                
+            case .onShowLiveMicrophonePopoverButtonTapped:
+                state.destination =  .popoverMicrophoneLive(.init())
+                
+            case .onShowMockMicrophonePopoverButtonTapped:
+                state.destination =  .popoverMicrophoneMock(.init())
 
             }
             return .none
@@ -159,7 +193,16 @@ struct MultipleDestinationsView: View {
                         viewStore.send(.onShowIntegratedSheetButtonTapped)
                     }
                 }
-
+                
+                Section("Micrphone") {
+                    Button("Show popover(Live)") {
+                        viewStore.send(.onShowLiveMicrophonePopoverButtonTapped)
+                    }
+                    
+                    Button("Show popover(Mock)") {
+                        viewStore.send(.onShowMockMicrophonePopoverButtonTapped)
+                    }
+                }
             }
             .sheet(
                 store: store.scope(
@@ -191,27 +234,26 @@ struct MultipleDestinationsView: View {
             ) { store in
                 HapticMenuApp(store: store)
             }
-            
-            .sheet(
-                store: store.scope(
-                    state: \.$destination,
-                    action: MultipleDestination.Action.destination
-                ),
-                state: /MultipleDestination.Destination.State.sheetIntegrated,
-                action: MultipleDestination.Destination.Action.sheetIntegrated
-            ) { store in
-                HapticButtonView(store: store)
-            }
-            .popover(
-                store: store.scope(
-                    state: \.$destination,
-                    action: MultipleDestination.Action.destination
-                ),
-                state: /MultipleDestination.Destination.State.popoverIntegrated,
-                action: MultipleDestination.Destination.Action.popoverIntegrated
-            ) { store in
-                HapticButtonView(store: store)
-            }
+//            .sheet(
+//                store: store.scope(
+//                    state: \.$destination,
+//                    action: MultipleDestination.Action.destination
+//                ),
+//                state: /MultipleDestination.Destination.State.sheetIntegrated,
+//                action: MultipleDestination.Destination.Action.sheetIntegrated
+//            ) { store in
+//                HapticButtonView(store: store)
+//            }
+//            .popover(
+//                store: store.scope(
+//                    state: \.$destination,
+//                    action: MultipleDestination.Action.destination
+//                ),
+//                state: /MultipleDestination.Destination.State.popoverIntegrated,
+//                action: MultipleDestination.Destination.Action.popoverIntegrated
+//            ) { store in
+//                HapticButtonView(store: store)
+//            }
             .navigationDestination(
                 store: store.scope(
                     state: \.$destination,
@@ -221,6 +263,26 @@ struct MultipleDestinationsView: View {
                 action: MultipleDestination.Destination.Action.drillDownIntegrated
             ) { store in
                 HapticButtonView(store: store)
+            }
+            .popover(
+                store: store.scope(
+                    state: \.$destination,
+                    action: MultipleDestination.Action.destination
+                ),
+                state: /MultipleDestination.Destination.State.popoverMicrophoneLive,
+                action: MultipleDestination.Destination.Action.popoverMicrophoneLive
+            ) { store in
+                MicrophoneView(store: store)
+            }
+            .popover(
+                store: store.scope(
+                    state: \.$destination,
+                    action: MultipleDestination.Action.destination
+                ),
+                state: /MultipleDestination.Destination.State.popoverMicrophoneMock,
+                action: MultipleDestination.Destination.Action.popoverMicrophoneMock
+            ) { store in
+                MicrophoneView(store: store)
             }
         }
     }
